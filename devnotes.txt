@@ -1,0 +1,4 @@
+When adding wavesurfer to a react project, ensure you manually disable strict mode, because
+that causes react to render each component twice,
+causing any useEffect hooks to fire twice in dev (not in prod). In dev, this caused two waveforms to appear in each track,
+because we initialzied wavesurfer in a useEffect
