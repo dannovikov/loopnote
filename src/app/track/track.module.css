@@ -1,0 +1,31 @@
+.track_container {
+    position:relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100px;
+    height: 100px;
+    width: auto;
+    /* thick white border 5px all sides */
+    /* border: 1px solid black; */
+    /* border-radius: 10px; */
+}
+
+.track_body {
+    height: 100%;
+    width: 800px;
+    border-radius: 10px;
+}
+
+.track_name {
+    position: absolute;
+    color: white;
+    height: 100%;
+    padding-left: 8px
+
+}
+
+.track_waveform {
+    height: 100%;
+    border-radius: 10px;
+
+}

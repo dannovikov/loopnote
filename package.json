@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.0.4"
+    "react-draggable": "^4.4.6",
+    "wavesurfer.js": "^7.5.1"
   }
 }

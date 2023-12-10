@@ -1,0 +1,32 @@
+.projectbarentry {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    /* align-items: center; */
+    width: auto;
+    height: auto;
+    color:#A0A2A4;
+    background-color: #1F2123;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 10px;
+
+}
+.projectbarentry:hover {
+    background-color: #2F3133;
+    color: white;
+}
+
+.current {
+    color: white;
+    background-color: #2F3133;
+
+
+
+
+}
