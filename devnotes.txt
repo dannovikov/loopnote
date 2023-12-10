@@ -2,3 +2,11 @@ When adding wavesurfer to a react project, ensure you manually disable strict mo
 that causes react to render each component twice,
 causing any useEffect hooks to fire twice in dev (not in prod). In dev, this caused two waveforms to appear in each track,
 because we initialzied wavesurfer in a useEffect
+
+
+In terms of tracking timing changes. What if the editor changes size? 
+Does the way I use number of pixels reflect the timings on different screen sizes?
+
+When the playhead moves, i dont think we can use a fixed pixel to time map, like 20px per second,
+ because the number of pixels will change depending on screen width
+ same question as above

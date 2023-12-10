@@ -15,8 +15,8 @@ export default function ProjectBarEntry({id, name, link, setCurrentProject, isCu
             <p className={class_string} onClick={() => {setCurrentProject(currentProject)}}>{name}</p>
         );
     } 
-    
+
     return (
-            <p className={styles.projectbarentry} onClick={() => {setCurrentProject(currentProject)}}>{name}</p>
+        <p className={styles.projectbarentry} onClick={() => {setCurrentProject(currentProject)}}>{name}</p>
     );
 }
