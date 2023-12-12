@@ -5,7 +5,10 @@ import styles from './editor.module.css';
 import Header from '../header/header';
 import PlayHead from '../playhead/playhead';
 import Track from '../track/track';
-import PlayControls from '../playcontrols/playcontrols';
+import PlayControlsArea from '../playcontrolsarea/playcontrolsarea';
+import NewTrackButton from '../newtrackbuttons/newtrackbutton/newtrackbutton';
+import UploadButton from '../newtrackbuttons/uploadButton/uploadButton';
+import RecordButton from '../newtrackbuttons/recordButton/recordButton';
 
 
 // This is a mock function to simulate fetching tracks from the server
@@ -32,11 +35,14 @@ const fetchProjectTracks = (id, server, updateServer) => {
 
 export default function Editor({currentProject, server}) {
   const [tracks, setTracks] = useState([])
+  const [trackOptionsOpen, setTrackOptionsOpen] = useState(false)
+
 
   // TODO: needs a better name, maybe dbupdate("startTime", trackId, startTime)
   let updateServer = (trackId, startTime) => {
     server[`project${currentProject.id}`][trackId]["startTime"] = startTime;
   }
+
 
   // Update tracks when the current project changes, and change the updateServer function to target the new project 
   useEffect(() => {
@@ -68,9 +74,14 @@ export default function Editor({currentProject, server}) {
               />
             )
           })}
+         <div className={styles.new_track_container}> 
+            <NewTrackButton setTrackOptionsOpen={setTrackOptionsOpen}/>
+            <RecordButton isVisible={trackOptionsOpen}/>
+            <UploadButton isVisible={trackOptionsOpen}/>
+         </div>
         </div>
       </div>
-      <PlayControls/>
+      <PlayControlsArea/>
     </div>
   );
 }

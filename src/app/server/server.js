@@ -72,7 +72,9 @@ let server = {
         "trackBodyColor": "#7348B7",
         "trackWaveColor": "#5E3B92"
       },
-    }
+    },
+    "project3": {
+    },
   }
 
     export default server;

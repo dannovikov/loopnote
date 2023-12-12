@@ -1,0 +1,37 @@
+.buttonContainer {
+    margin-top: 50px;
+    margin-left: 7px;
+    margin-right: 7px;
+    width: 50px; 
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    cursor: pointer;
+    background-color: #DBDBDB; /* Dark gray background, matching the project bar */
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2); /* Subtle drop shadow */
+  }
+  
+  .button {
+  }
+  
+  .x, .plus {
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    color: #A0A2A4; /* Lighter gray color for the text */
+    font-size: 24px; /* Adjust the font size as needed */
+    transform: rotate(0deg); /* Default rotation for the plus */
+    transition: transform 0.3s ease; /* Smooth rotation transition */
+  }
+  
+  .x {
+    transform: rotate(45deg); /* Rotate to become an 'X' */
+  }
+
+  .x svg, .plus svg {
+    width: 24px;  /* Set the desired width */
+    height: 24px; /* Set the desired height */
+  }
+  

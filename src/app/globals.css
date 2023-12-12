@@ -8,4 +8,5 @@ So I can calculate heights of the page elements relative to the header to = 100v
 :root {
     --header-height: 50px;
     --playcontrols-height: 100px;
+    --track-height: 100px;
 }
