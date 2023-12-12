@@ -54,12 +54,29 @@ export default function Editor({currentProject, server}) {
 
   // on click anywhere in the editor, close the track options tray
 
-  const handleClick = () => {
+  const handleClickOnWhitespace = () => {
     setTrackOptionsOpen(false);
+  }
+
+  // support file input from upload button
+  const triggerFileInput = (event) => {
+    document.getElementById("uploadButtonFileInput").click();
+  }
+
+  const handleFileInput = (event) => {
+    console.log(event.target.files[0]);
+    // if filetype is not a support audio file type .mp3 and .wav specifically, 
+    // then return and do not upload the file
+    if (!event.target.files[0].type.includes("audio")) {
+      return;
+    }
+    const file = event.target.files[0];
+    // TODO: upload file to server
+    // TODO: create new track in client using the file
   }
   
   return (
-    <div className = {styles.editor_area} onClick={handleClick}>
+    <div className = {styles.editor_area} onClick={handleClickOnWhitespace}>
       <Header name={currentProject.name}/>
       <div className={styles.editor_centering_container}>
         <div className={styles.editor}>
@@ -83,7 +100,8 @@ export default function Editor({currentProject, server}) {
          <div className={styles.new_track_container}> 
             <NewTrackButton trackOptionsOpen={trackOptionsOpen} setTrackOptionsOpen={setTrackOptionsOpen}/>
             <RecordButton isVisible={trackOptionsOpen}/>
-            <UploadButton isVisible={trackOptionsOpen}/>
+            <input type="file" id="uploadButtonFileInput" style={{display: "none"}} onChange={handleFileInput}/>
+            <UploadButton isVisible={trackOptionsOpen} triggerFileInput={triggerFileInput}/>
             <LinkButton isVisible={trackOptionsOpen}/>
          </div>
         </div>
