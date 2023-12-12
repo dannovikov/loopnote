@@ -64,6 +64,10 @@ export default function Editor({currentProject, server}) {
   }
 
   const handleFileInput = (event) => {
+    // if the user cancels the file upload, then return and do not upload the file
+    if (event.target.files.length === 0) {
+      return;
+    }
     console.log(event.target.files[0]);
     // if filetype is not a support audio file type .mp3 and .wav specifically, 
     // then return and do not upload the file
