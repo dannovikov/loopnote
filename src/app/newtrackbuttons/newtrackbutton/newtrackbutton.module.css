@@ -23,7 +23,7 @@
     color: #A0A2A4; /* Lighter gray color for the text */
     font-size: 24px; /* Adjust the font size as needed */
     transform: rotate(0deg); /* Default rotation for the plus */
-    transition: transform 0.3s ease; /* Smooth rotation transition */
+    transition: transform 0.5s ease; /* Smooth rotation transition */
   }
   
   .x {

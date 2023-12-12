@@ -9,6 +9,7 @@ import PlayControlsArea from '../playcontrolsarea/playcontrolsarea';
 import NewTrackButton from '../newtrackbuttons/newtrackbutton/newtrackbutton';
 import UploadButton from '../newtrackbuttons/uploadButton/uploadButton';
 import RecordButton from '../newtrackbuttons/recordButton/recordButton';
+import LinkButton from '../newtrackbuttons/linkbutton/linkButton';
 
 
 // This is a mock function to simulate fetching tracks from the server
@@ -51,9 +52,14 @@ export default function Editor({currentProject, server}) {
     setTracks(newTracks)
   }, [currentProject])
 
+  // on click anywhere in the editor, close the track options tray
+
+  const handleClick = () => {
+    setTrackOptionsOpen(false);
+  }
   
   return (
-    <div className = {styles.editor_area}>
+    <div className = {styles.editor_area} onClick={handleClick}>
       <Header name={currentProject.name}/>
       <div className={styles.editor_centering_container}>
         <div className={styles.editor}>
@@ -75,9 +81,10 @@ export default function Editor({currentProject, server}) {
             )
           })}
          <div className={styles.new_track_container}> 
-            <NewTrackButton setTrackOptionsOpen={setTrackOptionsOpen}/>
+            <NewTrackButton trackOptionsOpen={trackOptionsOpen} setTrackOptionsOpen={setTrackOptionsOpen}/>
             <RecordButton isVisible={trackOptionsOpen}/>
             <UploadButton isVisible={trackOptionsOpen}/>
+            <LinkButton isVisible={trackOptionsOpen}/>
          </div>
         </div>
       </div>
