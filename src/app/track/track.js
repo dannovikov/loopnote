@@ -27,7 +27,7 @@ export default function Track({id, name, link, duration, trackStartTime, trackBo
       height: 100,
       cursorWidth: 0,
     });
-    waveSurferRef.current.load('https://www.mfiles.co.uk/mp3-downloads/gs-cd-track2.mp3');
+    waveSurferRef.current.load(link ? link :'https://www.mfiles.co.uk/mp3-downloads/gs-cd-track2.mp3');
   }, []);
 
   // adding styling here because the track color is dynamic

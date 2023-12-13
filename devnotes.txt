@@ -10,3 +10,7 @@ Does the way I use number of pixels reflect the timings on different screen size
 When the playhead moves, i dont think we can use a fixed pixel to time map, like 20px per second,
  because the number of pixels will change depending on screen width
  same question as above
+
+ For long-term storage, such as storing files in a database, you would typically upload the file to a server, 
+ store it there (or in cloud storage), and then save the URL pointing to the server-stored file in your database.
+  This URL can then be retrieved and used to load the file into WaveSurfer.js or for other purposes.

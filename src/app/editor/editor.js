@@ -39,7 +39,7 @@ export default function Editor({currentProject, server}) {
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false)
 
 
-  // TODO: needs a better name, maybe dbupdate("startTime", trackId, startTime)
+  // TODO: needs a better name
   let updateServer = (trackId, startTime) => {
     server[`project${currentProject.id}`][trackId]["startTime"] = startTime;
   }
@@ -53,7 +53,6 @@ export default function Editor({currentProject, server}) {
   }, [currentProject])
 
   // on click anywhere in the editor, close the track options tray
-
   const handleClickOnWhitespace = () => {
     setTrackOptionsOpen(false);
   }
@@ -64,19 +63,48 @@ export default function Editor({currentProject, server}) {
   }
 
   const handleFileInput = (event) => {
-    // if the user cancels the file upload, then return and do not upload the file
+    /*
+    What needs to happen when a file is selected:
+    - check if the file is an audio file
+    - if not, return
+    - upload the file to the server
+    - create a new track in the client using the file   
+    */
+  
     if (event.target.files.length === 0) {
       return;
     }
-    console.log(event.target.files[0]);
-    // if filetype is not a support audio file type .mp3 and .wav specifically, 
-    // then return and do not upload the file
-    if (!event.target.files[0].type.includes("audio")) {
+  
+    if (!event.target.files[0].type.includes("audio") &&
+        !event.target.files[0].name.includes(".mp3") &&
+        !event.target.files[0].name.includes(".wav")) {
       return;
     }
+
     const file = event.target.files[0];
+    
     // TODO: upload file to server
-    // TODO: create new track in client using the file
+    server[`project${currentProject.id}`][`track${tracks.length}`] = {
+      "name": file.name,
+      "link": URL.createObjectURL(file),
+      "trackBodyColor": "#C98161",
+      "trackWaveColor": "#A3684E",
+      "startTime": 0,
+      "duration": 0,
+    }
+    
+    // create new track in client using the file
+    const newTrack = {
+      "id": `"track${tracks.length}"`,
+      "name": file.name,
+      "link": URL.createObjectURL(file),
+      "trackBodyColor": "#C98161",
+      "trackWaveColor": "#A3684E",
+      "startTime": 0,
+      "duration": 0,
+      "updateServer": updateServer,
+    }
+    setTracks([...tracks, newTrack])
   }
   
   return (
