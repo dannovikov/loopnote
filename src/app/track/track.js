@@ -7,7 +7,7 @@ import Draggable from 'react-draggable'; // The default
 
 
 
-export default function Track({id, name, link, duration, trackStartTime, trackBodyColor, trackWaveColor, updateServer}) {
+export default function Track({id, projectId, name, link, duration, trackStartTime, trackBodyColor, trackWaveColor, dbUpdateTrackStartTime}) {
 
   console.log(`trackStartTime: ${trackStartTime}`)
 
@@ -30,8 +30,23 @@ export default function Track({id, name, link, duration, trackStartTime, trackBo
     waveSurferRef.current.load(link ? link :'https://www.mfiles.co.uk/mp3-downloads/gs-cd-track2.mp3');
   }, []);
 
-  // adding styling here because the track color is dynamic
-  // TODO: create a CSS variable for track color, it shouldnt overwrite the rest of the CSS, which can be in a separate file
+
+  // Push track position updates to the database, at most once per second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (startTime !== null && startTime !== lastStartTime.current) {
+        dbUpdateTrackStartTime(projectId, id, startTime);
+        lastStartTime.current = startTime;
+      }
+    }, 1000); // Update at most once per second
+    return () => clearInterval(interval);
+  }, [startTime]);
+  
+
+  const handleDrag = (e, data) => {
+    setStartTime(data.x);
+  }
+
   const waveformStyle = {
     backgroundColor: trackBodyColor,
     height: '100%',
@@ -39,28 +54,6 @@ export default function Track({id, name, link, duration, trackStartTime, trackBo
     boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
 
   }
-
-  const handleDrag = (e, data) => {
-    // data.x and data.y are relative to the parent container
-    setStartTime(data.x);
-  }
-
-  // Push track position updates to the server 
-
-  // TODO: Currently handled by each track independently, but maybe should be handled by the editor to minimize server calls
-  // each track would notify the editor that it was repositioned, the editor would report to the DB if changes exist
-  // one complication is replacing the way we use lastStartTime.current to avoid sending duplicate updates
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (startTime !== null && startTime !== lastStartTime.current) {
-        updateServer(id, startTime);
-        lastStartTime.current = startTime;
-      }
-    }, 1000); // Update at most once per second
-    return () => clearInterval(interval);
-  }, [startTime]);
-  
 
   return (
       <div className={styles.track_container}>

@@ -1,11 +1,11 @@
 import styles from './uploadButton.module.css';
 
-export default function UploadButton({isVisible, triggerFileInput}) {
+export default function UploadButton({isVisible, openFileExplorer}) {
 
     let buttonContainerStyle = isVisible ? `${styles.buttonContainer} ${styles.visible}` : `${styles.buttonContainer} ${styles.hidden}`
 
     return (
-        <div className={buttonContainerStyle} onClick={triggerFileInput}>
+        <div className={buttonContainerStyle} onClick={openFileExplorer}>
             <div className={styles.button}>
                 <svg xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" viewBox="0 0 32 32" x="0px" y="0px">
                     <path fill="#A0A2A4" d="m27,14.95c-0.55,0-1,0.45-1,1v6.28c0,0.98-0.79,1.77-1.75,1.77H7.75c-0.96,0-1.75-0.79-1.75-1.77v-6.28c0-0.55-0.45-1-1-1s-1,0.45-1,1v6.28c0,2.08,1.68,3.77,3.75,3.77h16.5c2.07,0,3.75-1.69,3.75-3.77v-6.28c0-0.55-0.45-1-1-1Z"  />

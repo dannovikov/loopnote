@@ -12,21 +12,20 @@ import RecordButton from '../newtrackbuttons/recordButton/recordButton';
 import LinkButton from '../newtrackbuttons/linkbutton/linkButton';
 
 
-// This is a mock function to simulate fetching tracks from the server
-const fetchProjectTracks = (id, server, updateServer) => {
-  const project = server[`project${id}`]
+const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
+  const project = server[`project${projectId}`]
   let tracks = []
-
   for (const [trackId, trackData] of Object.entries(project)) {
     const track = {
-      "id": trackId,
+      "id": trackId.replace("track", ""),
+      "projectId": projectId,
       "name": trackData.name,
       "link": trackData.link,
       "trackBodyColor": trackData.trackBodyColor,
       "trackWaveColor": trackData.trackWaveColor,
       "startTime": trackData.startTime,
       "duration": trackData.duration,
-      "updateServer": updateServer,
+      "dbUpdateTrackStartTime": dbUpdateTrackStartTime,
     }
     tracks.push(track)
   }
@@ -39,50 +38,28 @@ export default function Editor({currentProject, server}) {
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false)
 
 
-  // TODO: needs a better name
-  let updateServer = (trackId, startTime) => {
-    server[`project${currentProject.id}`][trackId]["startTime"] = startTime;
+  const dbUpdateTrackStartTime = (projectId, trackId, startTime) => {
+    server[`project${projectId}`][`track${trackId}`]["startTime"] = startTime;
   }
 
-
-  // Update tracks when the current project changes, and change the updateServer function to target the new project 
-  useEffect(() => {
-    updateServer = (trackId, startTime) => {server[`project${currentProject.id}`][trackId]["startTime"] = startTime;}
-    const newTracks = fetchProjectTracks(currentProject.id, server, updateServer)
-    setTracks(newTracks)
-  }, [currentProject])
-
-  // on click anywhere in the editor, close the track options tray
-  const handleClickOnWhitespace = () => {
+  const closeOptions = () => {
     setTrackOptionsOpen(false);
   }
 
-  // support file input from upload button
-  const triggerFileInput = (event) => {
+  const openFileExplorer = (event) => {
     document.getElementById("uploadButtonFileInput").click();
   }
 
-  const handleFileInput = (event) => {
-    /*
-    What needs to happen when a file is selected:
-    - check if the file is an audio file
-    - if not, return
-    - upload the file to the server
-    - create a new track in the client using the file   
-    */
-  
+  const handleFileInput = (event) => {  
     if (event.target.files.length === 0) {
       return;
     }
-  
     if (!event.target.files[0].type.includes("audio") &&
         !event.target.files[0].name.includes(".mp3") &&
         !event.target.files[0].name.includes(".wav")) {
       return;
     }
-
     const file = event.target.files[0];
-    
     // TODO: upload file to server
     server[`project${currentProject.id}`][`track${tracks.length}`] = {
       "name": file.name,
@@ -92,50 +69,46 @@ export default function Editor({currentProject, server}) {
       "startTime": 0,
       "duration": 0,
     }
-    
+
+
     // create new track in client using the file
     const newTrack = {
-      "id": `"track${tracks.length}"`,
+      "id": tracks.length,
+      "projectId": currentProject.id,
       "name": file.name,
       "link": URL.createObjectURL(file),
       "trackBodyColor": "#C98161",
       "trackWaveColor": "#A3684E",
       "startTime": 0,
       "duration": 0,
-      "updateServer": updateServer,
+      "dbUpdateTrackStartTime": dbUpdateTrackStartTime,
     }
     setTracks([...tracks, newTrack])
   }
   
+
+  // Update tracks when the current project changes
+  useEffect(() => {
+    const newTracks = fetchProjectTracks(currentProject.id, server, dbUpdateTrackStartTime)
+    setTracks(newTracks)
+  }, [currentProject])
+
+
   return (
-    <div className = {styles.editor_area} onClick={handleClickOnWhitespace}>
+    <div className = {styles.editor_area} onClick={closeOptions}>
       <Header name={currentProject.name}/>
       <div className={styles.editor_centering_container}>
         <div className={styles.editor}>
           <PlayHead/>
           {tracks.map((track, index) => {
-            console.log(`track ${index} has startTime: ${track.startTime}`)
-            return (
-              <Track 
-                key={index} 
-                id={track.id} 
-                name={track.name}
-                link={track.link}
-                duration={track.duration}
-                trackStartTime={track.startTime}
-                trackBodyColor={track.trackBodyColor}
-                trackWaveColor={track.trackWaveColor}
-                updateServer={updateServer} 
-              />
-            )
-          })}
-         <div className={styles.new_track_container}> 
+            return (<Track key={index} id={track.id} projectId={track.projectId} name={track.name} link={track.link} duration={track.duration} trackStartTime={track.startTime} trackBodyColor={track.trackBodyColor} trackWaveColor={track.trackWaveColor} dbUpdateTrackStartTime={dbUpdateTrackStartTime} />)})}
+          <div className={styles.new_track_container}> 
             <NewTrackButton trackOptionsOpen={trackOptionsOpen} setTrackOptionsOpen={setTrackOptionsOpen}/>
             <RecordButton isVisible={trackOptionsOpen}/>
             <input type="file" id="uploadButtonFileInput" style={{display: "none"}} onChange={handleFileInput}/>
-            <UploadButton isVisible={trackOptionsOpen} triggerFileInput={triggerFileInput}/>
+            <UploadButton isVisible={trackOptionsOpen} openFileExplorer={openFileExplorer}/>
             <LinkButton isVisible={trackOptionsOpen}/>
-         </div>
+          </div>
         </div>
       </div>
       <PlayControlsArea/>
