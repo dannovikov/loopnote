@@ -4,6 +4,24 @@
     flex-direction: row;
     height: var(--playcontrols-height);
     width: 300px;
-    height: 50px;
-    justify-content: space-between;
+    justify-content: space-around;
 }
+
+.controlbutton {
+    position: relative;
+    width: 50px; 
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    cursor: pointer;
+    background-color: #DBDBDB; /* Dark gray background, matching the project bar */
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2); /* Subtle drop shadow */
+}
+
+.controlbutton svg {
+    margin-top: 2px;
+    width: 29px;  /* Set the desired width */
+    height: 29px; /* Set the desired height */
+  }
