@@ -57,16 +57,16 @@ export default function Track({id, projectId, name, link, duration, trackStartTi
 
   return (
       <div className={styles.track_container}>
-        <Draggable bounds="parent" onStop={handleDrag} defaultPosition={{x: startTime, y: 0}}>
-          <div className={styles.track_body}>
-            <div className={styles.track_name}>
-              track name
-            </div>
-              <div className={styles.track_waveform}>
-              <div ref={waveformRef} style={waveformStyle}></div>
+          <Draggable bounds="parent" onStop={handleDrag} defaultPosition={{x: startTime, y: 0}}>
+            <div className={styles.track_body}>
+              <div className={styles.track_name}>
+                track name
               </div>
-          </div>
-        </Draggable>
+                <div className={styles.track_waveform}>
+                <div ref={waveformRef} style={waveformStyle}></div>
+                </div>
+            </div>
+          </Draggable>
       </div>
   );
 }

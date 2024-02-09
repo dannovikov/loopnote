@@ -100,14 +100,28 @@ export default function Editor({currentProject, server}) {
       <div className={styles.editor_centering_container}>
         <div className={styles.editor}>
           <PlayHead/>
+          
           {tracks.map((track, index) => {
-            return (<Track key={index} id={track.id} projectId={track.projectId} name={track.name} link={track.link} duration={track.duration} trackStartTime={track.startTime} trackBodyColor={track.trackBodyColor} trackWaveColor={track.trackWaveColor} dbUpdateTrackStartTime={dbUpdateTrackStartTime} />)})}
+            return (<Track 
+            key={index} 
+            id={track.id} 
+            projectId={track.projectId} 
+            name={track.name} 
+            link={track.link} 
+            duration={track.duration} 
+            trackStartTime={track.startTime} 
+            trackBodyColor={track.trackBodyColor} 
+            trackWaveColor={track.trackWaveColor} 
+            dbUpdateTrackStartTime={dbUpdateTrackStartTime} />)})}
+
           <div className={styles.new_track_container}> 
+
             <NewTrackButton trackOptionsOpen={trackOptionsOpen} setTrackOptionsOpen={setTrackOptionsOpen}/>
             <RecordButton isVisible={trackOptionsOpen}/>
             <input type="file" id="uploadButtonFileInput" style={{display: "none"}} onChange={handleFileInput}/>
             <UploadButton isVisible={trackOptionsOpen} openFileExplorer={openFileExplorer}/>
             <LinkButton isVisible={trackOptionsOpen}/>
+
           </div>
         </div>
       </div>

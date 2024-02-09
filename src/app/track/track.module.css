@@ -1,9 +1,9 @@
 .track_container {
     position:relative;
-    display: flex;
+    display: fixed;
     flex-direction: column;
     height: var(--track-height);
-    /* width: auto; */
+    width: var(--project-width);
 }
 
 .track_body {
