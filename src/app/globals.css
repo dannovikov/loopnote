@@ -11,5 +11,5 @@ So I can calculate heights of the page elements relative to the header to = 100v
     --track-height: 100px;
     --pixels-per-second: 10px;
     --project-duration: 180px;
-    --project-width: var(--pixels-per-second) * var(--project-duration);
+    --project-width: 2800px;
 }
