@@ -3,7 +3,8 @@
     display: fixed;
     flex-direction: column;
     height: var(--track-height);
-    width: var(--project-width);
+    /* width: var(--project-width); */
+    width:100%;
 }
 
 .track_body {

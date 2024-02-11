@@ -3,8 +3,9 @@
     display: flex;
     flex-direction: row;
     height: var(--playcontrols-height);
-    width: 300px;
+    width: 200px;
     justify-content: space-around;
+    margin-bottom: 50px;
 }
 
 .controlbutton {
@@ -24,4 +25,14 @@
     margin-top: 2px;
     width: 29px;  /* Set the desired width */
     height: 29px; /* Set the desired height */
+  }
+
+  #rr {
+    margin-right: 3px;
+  }
+  #pp {
+    margin-left: 3px;
+  }
+  #ff {
+    margin-left: 3px;
   }

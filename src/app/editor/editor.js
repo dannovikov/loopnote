@@ -6,10 +6,7 @@ import Header from '../header/header';
 import PlayHead from '../playhead/playhead';
 import Track from '../track/track';
 import PlayControlsArea from '../playcontrolsarea/playcontrolsarea';
-import NewTrackButton from '../newtrackbuttons/newtrackbutton/newtrackbutton';
-import UploadButton from '../newtrackbuttons/uploadButton/uploadButton';
-import RecordButton from '../newtrackbuttons/recordButton/recordButton';
-import LinkButton from '../newtrackbuttons/linkbutton/linkButton';
+import NewTrackButtons from '../newtrackbuttons/newtrackbuttons';
 
 
 const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
@@ -33,7 +30,7 @@ const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
 }
 
 
-export default function Editor({currentProject, server}) {
+export default function Editor({ currentProject, server }) {
   const [tracks, setTracks] = useState([])
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false)
 
@@ -50,13 +47,13 @@ export default function Editor({currentProject, server}) {
     document.getElementById("uploadButtonFileInput").click();
   }
 
-  const handleFileInput = (event) => {  
+  const handleFileInput = (event) => {
     if (event.target.files.length === 0) {
       return;
     }
     if (!event.target.files[0].type.includes("audio") &&
-        !event.target.files[0].name.includes(".mp3") &&
-        !event.target.files[0].name.includes(".wav")) {
+      !event.target.files[0].name.includes(".mp3") &&
+      !event.target.files[0].name.includes(".wav")) {
       return;
     }
     const file = event.target.files[0];
@@ -85,7 +82,7 @@ export default function Editor({currentProject, server}) {
     }
     setTracks([...tracks, newTrack])
   }
-  
+
 
   // Update tracks when the current project changes
   useEffect(() => {
@@ -95,37 +92,40 @@ export default function Editor({currentProject, server}) {
 
 
   return (
-    <div className = {styles.editor_area} onClick={closeOptions}>
-      <Header name={currentProject.name}/>
+    <div className={styles.editor_area} onClick={closeOptions}>
+
+      <Header name={currentProject.name} />
+
       <div className={styles.editor_centering_container}>
         <div className={styles.editor}>
-          <PlayHead/>
-          
+
+          <PlayHead />
+
           {tracks.map((track, index) => {
-            return (<Track 
-            key={index} 
-            id={track.id} 
-            projectId={track.projectId} 
-            name={track.name} 
-            link={track.link} 
-            duration={track.duration} 
-            trackStartTime={track.startTime} 
-            trackBodyColor={track.trackBodyColor} 
-            trackWaveColor={track.trackWaveColor} 
-            dbUpdateTrackStartTime={dbUpdateTrackStartTime} />)})}
+            return (<Track
+              key={index}
+              id={track.id}
+              projectId={track.projectId}
+              name={track.name}
+              link={track.link}
+              duration={track.duration}
+              trackStartTime={track.startTime}
+              trackBodyColor={track.trackBodyColor}
+              trackWaveColor={track.trackWaveColor}
+              dbUpdateTrackStartTime={dbUpdateTrackStartTime} />)
+          })}
 
-          <div className={styles.new_track_container}> 
+          <NewTrackButtons
+            trackOptionsOpen={trackOptionsOpen}
+            setTrackOptionsOpen={setTrackOptionsOpen}
+            handleFileInput={handleFileInput}
+            openFileExplorer={openFileExplorer} />
 
-            <NewTrackButton trackOptionsOpen={trackOptionsOpen} setTrackOptionsOpen={setTrackOptionsOpen}/>
-            <RecordButton isVisible={trackOptionsOpen}/>
-            <input type="file" id="uploadButtonFileInput" style={{display: "none"}} onChange={handleFileInput}/>
-            <UploadButton isVisible={trackOptionsOpen} openFileExplorer={openFileExplorer}/>
-            <LinkButton isVisible={trackOptionsOpen}/>
-
-          </div>
         </div>
       </div>
-      <PlayControlsArea/>
+
+      <PlayControlsArea />
+      
     </div>
   );
 }

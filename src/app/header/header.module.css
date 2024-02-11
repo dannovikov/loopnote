@@ -1,10 +1,11 @@
 .header {
     display: flex;
     flex-direction: row;
-    border: 1px solid black;
     height: var(--header-height);
     width: 100%;
-    justify-content: center;
+    justify-content: left;
     background-color: #DBDBDB;
+    align-items: center;
+    margin-left: var(--editor-left-margin);
 
 }

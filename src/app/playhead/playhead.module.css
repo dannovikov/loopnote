@@ -1,8 +1,11 @@
 .playhead {
     display: flex;
     flex-direction: row;
-    border: 1px solid black;
     width: 100%;
     justify-content: center;
-
+    height: 25px;
+    background-color: rgb(0, 0, 0);
+    margin-bottom: 5px;
+    color: white;
+    border-radius: 25px;
 }
