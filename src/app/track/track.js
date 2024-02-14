@@ -38,7 +38,7 @@ export default function Track({id, projectId, name, link, duration, trackStartTi
         dbUpdateTrackStartTime(projectId, id, startTime);
         lastStartTime.current = startTime;
       }
-    }, 1000); // Update at most once per second
+    }, 250); // Update at most 4x per second
     return () => clearInterval(interval);
   }, [startTime]);
   
