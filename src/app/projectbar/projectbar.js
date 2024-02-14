@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import styles from './projectbar.module.css'
-import ProjectBarEntry from '../projectbarentry/projectbarentry'
+import ProjectBarEntry from './projectbarentry/projectbarentry'
 
 
 export default function ProjectBar({currentProject, setCurrentProject, getProjects}) {

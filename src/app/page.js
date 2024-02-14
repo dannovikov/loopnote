@@ -23,7 +23,7 @@ const getProjects = () => {
 
 export default function Home() {
 
-  const [currentProject, setCurrentProject] = useState({"id": 0, "name": "Loopnote", "link": "project0"})
+  const [currentProject, setCurrentProject] = useState({"id": 0, "name": "project0", "link": "project0"})
 
   return (
       <div className={styles.page}>

@@ -1,6 +1,6 @@
 import styles from './playcontrolsarea.module.css'
 import NewTrackOptionsButton from '../newtrackbuttons/newtrackbutton/newtrackbutton';
-import PlayControls from '../playcontrols/playcontrols';
+import PlayControls from './playcontrols/playcontrols';
 
 
 export default function PlayControlsArea() {
