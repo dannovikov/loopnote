@@ -121,7 +121,7 @@ export default function Editor({ currentProject, server }) {
       <div className={styles.editor_centering_container}>
         {/* <div className={styles.editor} style={{width: `5000 * ${pixelsPerSecond}`}}> */}
         <div className={styles.editor} style={{width: "2800px"}}>
-          <PlayHeadBar playheadPosition={playheadPosition} />
+          <PlayHeadBar playheadPosition={playheadPosition} setPlayheadPosition={setPlayheadPosition} />
           {tracks.map((track, index) => {
             return (
               <Track
