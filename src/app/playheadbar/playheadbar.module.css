@@ -15,8 +15,10 @@
 .playhead {
     width: 2px; /* Width of the vertical line */
     height: 100%; /* Full height of its container */
-    background-color: #000; /* Color of the playhead */
+    background-color: #ffffff60; /* Color of the playhead */
     position: absolute;
     transition: left 0.1s;
+    z-index: 1;
+    
 
 }
