@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./editor.module.css";
 import Header from "../header/header";
-import PlayHead from "../playhead/playhead";
+import PlayHeadBar from "../playheadbar/playheadbar";
 import Track from "../track/track";
 import PlayControlsArea from "../playcontrolsarea/playcontrolsarea";
 import NewTrackButtons from "../newtrackbuttons/newtrackbuttons";
@@ -32,6 +32,11 @@ const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
 export default function Editor({ currentProject, server }) {
   const [tracks, setTracks] = useState([]);
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false);
+  const [pixelsPerSecond, setPixelsPerSecond] = useState(3);
+  const [playheadPosition, setPlayheadPosition] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+
 
   // Effect to change the tracks when the current project changes
   useEffect(() => {
@@ -99,12 +104,16 @@ export default function Editor({ currentProject, server }) {
     setTracks([...tracks, newTrack]);
   };
 
+  // function to play the audio of a track, called when the play button is clicked and is based on the track's start time and the playhead position
+  // should it be in the track component? or in the editor component? 
+
   return (
     <div className={styles.editor_area} onClick={closeOptions}>
       <Header name={currentProject.name} />
       <div className={styles.editor_centering_container}>
-        <div className={styles.editor}>
-          <PlayHead />
+        {/* <div className={styles.editor} style={{width: `5000 * ${pixelsPerSecond}`}}> */}
+        <div className={styles.editor} style={{width: "2800px"}}>
+          <PlayHeadBar />
           {tracks.map((track, index) => {
             return (
               <Track

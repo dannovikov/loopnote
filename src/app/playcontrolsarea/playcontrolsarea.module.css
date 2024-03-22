@@ -5,5 +5,5 @@
     align-items: center;
     justify-content: center;
     height: var(--playcontrols-height);
-    width: 100vw;
+    width: 100% - var(--editor-left-margin);
 }

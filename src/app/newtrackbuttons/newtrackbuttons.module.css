@@ -3,6 +3,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    padding-bottom: 50px;
     height: var(--playcontrols-height);
     width: calc(100vw - var(--editor-left-margin)*2);
 }

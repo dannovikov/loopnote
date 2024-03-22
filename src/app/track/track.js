@@ -7,7 +7,7 @@ import Draggable from 'react-draggable'; // The default
 
 
 
-export default function Track({id, projectId, name, link, duration, trackStartTime, trackBodyColor, trackWaveColor, dbUpdateTrackStartTime}) {
+export default function Track({id, projectId, name, link, trackDuration, trackStartTime, trackBodyColor, trackWaveColor, dbUpdateTrackStartTime}) {
 
   console.log(`trackStartTime: ${trackStartTime}`)
 
@@ -52,7 +52,6 @@ export default function Track({id, projectId, name, link, duration, trackStartTi
     height: '100%',
     borderRadius: '10px',
     boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)'
-
   }
 
   return (

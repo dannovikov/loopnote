@@ -1,4 +1,4 @@
-import styles from './playhead.module.css'
+import styles from './playheadbar.module.css'
 
 export default function Header() {
     return (

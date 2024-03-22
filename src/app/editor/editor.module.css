@@ -3,22 +3,21 @@
     flex-direction: column;
     height: 100vh;
     background-color: #DBDBDB;
+    overflow-x: hidden;
 }
 
 .editor_centering_container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
     height: calc(100vh - var(--header-height) - var(--playcontrols-height));
+    overflow-x: scroll;
 }
 
 .editor {
     display: flex;
     flex-direction: column;
     height: auto;
-    width: var(--project-width);
     margin-left: var(--editor-left-margin);
     overflow-y: auto;
-    overflow-x: auto;
+    width: var(--project-width);
+    /* overflow-x: scroll; */
 
 }
