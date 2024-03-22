@@ -5,7 +5,7 @@ import styles from "./editor.module.css";
 import Header from "../header/header";
 import PlayHeadBar from "../playheadbar/playheadbar";
 import Track from "../track/track";
-import PlayControlsArea from "../playcontrolsarea/playcontrolsarea";
+import PlayControlsArea from "../newtrackbuttons/playcontrolsarea/playcontrolsarea";
 import NewTrackButtons from "../newtrackbuttons/newtrackbuttons";
 
 // Function to fetch the tracks of a project from the server
@@ -113,7 +113,7 @@ export default function Editor({ currentProject, server }) {
       <div className={styles.editor_centering_container}>
         {/* <div className={styles.editor} style={{width: `5000 * ${pixelsPerSecond}`}}> */}
         <div className={styles.editor} style={{width: "2800px"}}>
-          <PlayHeadBar />
+          <PlayHeadBar playheadPosition={playheadPosition} />
           {tracks.map((track, index) => {
             return (
               <Track
@@ -138,7 +138,12 @@ export default function Editor({ currentProject, server }) {
           />
         </div>
       </div>
-      <PlayControlsArea />
+      <PlayControlsArea
+            ntb_trackOptionsOpen={trackOptionsOpen}
+            ntb_setTrackOptionsOpen={setTrackOptionsOpen}
+            ntb_handleFileInput={handleFileInput}
+            ntb_openFileExplorer={openFileExplorer}
+      />
     </div>
   );
 }

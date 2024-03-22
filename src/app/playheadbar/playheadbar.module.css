@@ -1,4 +1,4 @@
-.playhead {
+.playheadbar {
     display: flex;
     flex-direction: row;
     width: 100%;
@@ -8,4 +8,16 @@
     margin-bottom: 5px;
     color: white;
     border-radius: 4px;
+}
+
+/* lets define the playhead to be a verrticale lineq */
+
+.playhead {
+    width: 2px; /* Width of the vertical line */
+    height: 100%; /* Full height of its container */
+    background-color: #000; /* Color of the playhead */
+    position: absolute;
+    /* left: calc(var(--editor-left-margin) + var(--projectbar_width)+50px); Position of the playhead */
+    /* left: 50px; */
+    /* left: calc(var(--editor-left-zmargin) + var(--projectbar-width) + 8px); */
 }

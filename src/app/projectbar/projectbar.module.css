@@ -1,6 +1,6 @@
 .project_bar {
     height: 100vh;
-    width: 13vw;
+    width: var(--projectbar-width);
     min-width: 200px;
     /* border: 10px solid black; */
     padding-left: 10px;

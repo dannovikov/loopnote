@@ -1,9 +1,9 @@
 import styles from './playcontrolsarea.module.css'
-import NewTrackOptionsButton from '../newtrackbuttons/newtrackbutton/newtrackbutton';
 import PlayControls from './playcontrols/playcontrols';
+import NewTrackButtons from "../newtrackbuttons";
 
 
-export default function PlayControlsArea() {
+export default function PlayControlsArea({ntb_trackOptionsOpen,ntb_setTrackOptionsOpen,ntb_handleFileInput,ntb_openFileExplorer}) {
     return (
         <div className={styles.playcontrolsarea}>
             <PlayControls/>

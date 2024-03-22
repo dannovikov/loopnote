@@ -13,5 +13,6 @@ So I can calculate heights of the page elements relative to the header to = 100v
     --pixels-per-second: 10px;
     --project-duration: 180px;
     --project-width: 2800px;
+    --projectbar-width: 200px;
     --editor-left-margin: 50px;
 }
