@@ -5,7 +5,7 @@ import styles from "./editor.module.css";
 import Header from "../header/header";
 import PlayHeadBar from "../playheadbar/playheadbar";
 import Track from "../track/track";
-import PlayControlsArea from "../newtrackbuttons/playcontrolsarea/playcontrolsarea";
+import PlayControlsArea from "../playcontrolsarea/playcontrolsarea";
 import NewTrackButtons from "../newtrackbuttons/newtrackbuttons";
 
 // Function to fetch the tracks of a project from the server
@@ -36,7 +36,15 @@ export default function Editor({ currentProject, server }) {
   const [playheadPosition, setPlayheadPosition] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   
-
+  // Effect to update the playhead position every 100ms when the audio is playing
+  useEffect(() => {
+    if (isPlaying) {
+      const interval = setInterval(() => {
+        setPlayheadPosition((prevPlayheadPosition) => prevPlayheadPosition + pixelsPerSecond/10);
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [isPlaying]);
 
   // Effect to change the tracks when the current project changes
   useEffect(() => {
@@ -143,6 +151,8 @@ export default function Editor({ currentProject, server }) {
             ntb_setTrackOptionsOpen={setTrackOptionsOpen}
             ntb_handleFileInput={handleFileInput}
             ntb_openFileExplorer={openFileExplorer}
+            isPlaying={isPlaying}
+            setIsPlaying={setIsPlaying}
       />
     </div>
   );

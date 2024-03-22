@@ -17,7 +17,6 @@
     height: 100%; /* Full height of its container */
     background-color: #000; /* Color of the playhead */
     position: absolute;
-    /* left: calc(var(--editor-left-margin) + var(--projectbar_width)+50px); Position of the playhead */
-    /* left: 50px; */
-    /* left: calc(var(--editor-left-zmargin) + var(--projectbar-width) + 8px); */
+    transition: left 0.1s;
+
 }
