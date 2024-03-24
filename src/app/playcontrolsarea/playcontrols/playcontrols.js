@@ -1,15 +1,22 @@
 import styles from './playcontrols.module.css'
 
-export default function PlayControls({isPlaying, setIsPlaying}) {
+export default function PlayControls({isPlaying, setIsPlaying, setPlayheadPosition, projectContentEndPosition, setPlayheadChangeIsCausedByUser}) {
   const togglePlay = () => {
     console.log("toggle play to: ", !isPlaying);
     setIsPlaying(!isPlaying);
   }
+
+  const jumpToStart = () => {
+    console.log("jump to start");
+    setPlayheadPosition(0);
+    setPlayheadChangeIsCausedByUser(true);
+  }
+
   return (
     <div className={styles.playcontrols}>
 
       {/* jump to start */}
-      <div  className={styles.controlbutton}>
+      <div  className={styles.controlbutton} onClick={jumpToStart}>
         <svg id={styles.rr} fill="none" stroke="#A0A2A4" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path>
         </svg>

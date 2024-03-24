@@ -3,7 +3,8 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    padding-bottom: 50px;
+    padding-bottom: calc(50px + var(--playcontrols-height));
     height: var(--playcontrols-height);
+    margin-right: 50px;
     width: calc(100vw - var(--editor-left-margin)*2);
 }

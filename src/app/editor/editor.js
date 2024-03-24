@@ -32,8 +32,9 @@ const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
 export default function Editor({ currentProject, server }) {
   const [tracks, setTracks] = useState([]);
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false);
-  const [pixelsPerSecond, setPixelsPerSecond] = useState(3);
+  const [pixelsPerSecond, setPixelsPerSecond] = useState(30);
   const [playheadPosition, setPlayheadPosition] = useState(0);
+  const [playheadChangeIsCausedByUser, setPlayheadChangeIsCausedByUser] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   
   // Effect to update the playhead position every 100ms when the audio is playing
@@ -59,6 +60,11 @@ export default function Editor({ currentProject, server }) {
   // function to update the start time of a track when it is dragged to a new position
   const dbUpdateTrackStartTime = (projectId, trackId, startTime) => {
     server[`project${projectId}`][`track${trackId}`]["startTime"] = startTime;
+  };
+
+  //function to update the duration of a track when waveSurfer loads it
+  const dbUpdateTrackDuration = (projectId, trackId, duration) => {
+    server[`project${projectId}`][`track${trackId}`]["duration"] = duration;
   };
 
   // function to close the new track options when clicking outside of the track options
@@ -119,9 +125,15 @@ export default function Editor({ currentProject, server }) {
     <div className={styles.editor_area} onClick={closeOptions}>
       <Header name={currentProject.name} />
       <div className={styles.editor_centering_container}>
-        {/* <div className={styles.editor} style={{width: `5000 * ${pixelsPerSecond}`}}> */}
-        <div className={styles.editor} style={{width: "2800px"}}>
-          <PlayHeadBar playheadPosition={playheadPosition} setPlayheadPosition={setPlayheadPosition} />
+        <div
+          className={styles.editor}
+          style={{ width: `${500 * pixelsPerSecond}px` }} //Todo: dynamic resizing
+        >
+          <PlayHeadBar
+            playheadPosition={playheadPosition}
+            setPlayheadPosition={setPlayheadPosition}
+            setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}
+          />
           {tracks.map((track, index) => {
             return (
               <Track
@@ -130,11 +142,17 @@ export default function Editor({ currentProject, server }) {
                 projectId={track.projectId}
                 name={track.name}
                 link={track.link}
-                duration={track.duration}
+                trackDuration={track.duration}
                 trackStartTime={track.startTime}
                 trackBodyColor={track.trackBodyColor}
                 trackWaveColor={track.trackWaveColor}
                 dbUpdateTrackStartTime={dbUpdateTrackStartTime}
+                dbUpdateTrackDuration={dbUpdateTrackDuration}
+                pixelsPerSecond={pixelsPerSecond}
+                playheadPosition={playheadPosition}
+                playheadChangeIsCausedByUser={playheadChangeIsCausedByUser}
+                setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}
+                projectIsPlaying={isPlaying}
               />
             );
           })}
@@ -147,12 +165,14 @@ export default function Editor({ currentProject, server }) {
         </div>
       </div>
       <PlayControlsArea
-            ntb_trackOptionsOpen={trackOptionsOpen}
-            ntb_setTrackOptionsOpen={setTrackOptionsOpen}
-            ntb_handleFileInput={handleFileInput}
-            ntb_openFileExplorer={openFileExplorer}
-            isPlaying={isPlaying}
-            setIsPlaying={setIsPlaying}
+        ntb_trackOptionsOpen={trackOptionsOpen}
+        ntb_setTrackOptionsOpen={setTrackOptionsOpen}
+        ntb_handleFileInput={handleFileInput}
+        ntb_openFileExplorer={openFileExplorer}
+        isPlaying={isPlaying}
+        setIsPlaying={setIsPlaying}
+        setPlayheadPosition={setPlayheadPosition}
+        setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}
       />
     </div>
   );
