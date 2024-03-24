@@ -4,6 +4,7 @@
     height: 100vh;
     background-color: #DBDBDB;
     overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 .editor_centering_container {

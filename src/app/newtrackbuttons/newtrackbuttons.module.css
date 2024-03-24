@@ -6,5 +6,5 @@
     padding-bottom: calc(50px + var(--playcontrols-height));
     height: var(--playcontrols-height);
     margin-right: 50px;
-    width: calc(100vw - var(--editor-left-margin)*2);
+    width: calc(100vw - var(--editor-left-margin)*2 - var(--projectbar-width));
 }

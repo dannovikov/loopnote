@@ -32,8 +32,8 @@ const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
 export default function Editor({ currentProject, server }) {
   const [tracks, setTracks] = useState([]);
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false);
-  const [pixelsPerSecond, setPixelsPerSecond] = useState(3);
-  const [prevPixelsPerSecond, setPrevPixelsPerSecond] = useState(3); 
+  const [pixelsPerSecond, setPixelsPerSecond] = useState(2);
+  const [prevPixelsPerSecond, setPrevPixelsPerSecond] = useState(2); 
   const [playheadPosition, setPlayheadPosition] = useState(0);
   const [playheadChangeIsCausedByUser, setPlayheadChangeIsCausedByUser] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
