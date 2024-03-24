@@ -173,6 +173,7 @@ export default function Editor({ currentProject, server }) {
         setIsPlaying={setIsPlaying}
         setPlayheadPosition={setPlayheadPosition}
         setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}
+        setPixelsPerSecond={setPixelsPerSecond}
       />
     </div>
   );
