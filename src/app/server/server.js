@@ -1,19 +1,19 @@
 let server = {
     "project0": {
       "track0": {
-        "startTime": 0,
+        "startTime": 15,
         "duration": 319.075125,
         "trackBodyColor": "#7348B7",
         "trackWaveColor": "#5E3B92"
       },
       "track1": {
-        "startTime": 0,
+        "startTime": 10,
         "duration": 319.075125,
         "trackBodyColor": "#4762C4",
         "trackWaveColor": "#384E9B"
       },
       "track2": {
-        "startTime": 0,
+        "startTime": 5,
         "duration": 319.075125,
         "trackBodyColor": "#61C9BD",
         "trackWaveColor": "#50A19A"
