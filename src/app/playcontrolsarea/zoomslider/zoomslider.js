@@ -6,7 +6,7 @@ export default function ZoomSlider({setPixelsPerSecond, projectIsPlaying}) {
     }
     return (
         <div className={styles.zoomslider}>
-            Zoom (just for testing):
+            Zoom:
             <br/>
             {projectIsPlaying ? <input type="range" min="1" max="100" defaultValue="30" style={{width:"400px"}} disabled/> :
             <input type="range" min="1" max="100" defaultValue="30" onChange={handleChange} style={{width:"400px"}}/>}

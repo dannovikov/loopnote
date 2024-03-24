@@ -31,12 +31,9 @@ export default function Track({
   const [trackStartTimeChanged, setTrackStartTimeChanged] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState({ x: startTime * pixelsPerSecond, y: 0 });
+  const [duration, setDuration] = useState(trackDuration);
+  
 
-
-  if (trackDuration === 0) {
-    trackDuration = 319.075125;
-    console.log("trackDuration is 0, setting to 319.075125");
-  }
 
   // A one-time effect to intialize the waveform
   useEffect(() => {
@@ -53,8 +50,9 @@ export default function Track({
     );
     // print track duration deduced by the waveSurfer
     waveSurferRef.current.on('ready', function () {
-      console.log('track duration:', waveSurferRef.current.getDuration());
-      dbUpdateTrackDuration(projectId, id, waveSurferRef.current.getDuration()); //Todo: this might not work. it may be too late as far as sizing the track
+      const waveDuration = waveSurferRef.current.getDuration();
+      setDuration(waveDuration);
+      dbUpdateTrackDuration(projectId, id, waveDuration);
     });
   }, []);
 
@@ -65,31 +63,43 @@ export default function Track({
     console.log("playheadTimeRelativeToTrack: ", playheadTimeRelativeToTrack);
 
     if (trackStartTimeChanged) { // due to dragging
-      waveSurferRef.current.seekTo(Math.max(0,playheadTimeRelativeToTrack / trackDuration));
+      waveSurferRef.current.seekTo(Math.max(0,playheadTimeRelativeToTrack / duration));
       setTrackStartTimeChanged(false);
-      if (playheadTimeRelativeToTrack <= 0 || playheadTimeRelativeToTrack >= trackDuration) {
+      if (playheadTimeRelativeToTrack <= 0 || playheadTimeRelativeToTrack >= duration) {
         waveSurferRef.current.pause();
         setIsPlaying(false);
       } 
     }
 
     if (projectIsPlaying) {  
-      if (playheadTimeRelativeToTrack >= 0 && playheadTimeRelativeToTrack <= trackDuration) {
+      if (playheadTimeRelativeToTrack >= 0 && playheadTimeRelativeToTrack <= duration) {
         if (!isPlaying) { //if track is not playing
-          waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / trackDuration);
+          waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / duration);
           waveSurferRef.current.play();
           setIsPlaying(true);
         } else { // if track is playing
           if (playheadChangeIsCausedByUser) { //not just time passing
-            waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / trackDuration);
+            waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / duration);
             setPlayheadChangeIsCausedByUser(false);
           }
         }
+
+      } else { // if playhead is outside of track
+        // console.log("playhead is outside of track", playheadTimeRelativeToTrack, trackDuration, playheadTimeSeconds, startTime, duration);
+        waveSurferRef.current.pause();
+        waveSurferRef.current.seekTo(0);
+        setIsPlaying(false);
       }
+
     } else { // if project is not playing
       waveSurferRef.current.pause();
       setIsPlaying(false);
-      waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / trackDuration);
+      if (duration != 0) {
+        waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / duration);
+      } else {
+        waveSurferRef.current.seekTo(0);
+      }
+      
     }
   }, [playheadPosition, projectIsPlaying, playheadChangeIsCausedByUser, trackStartTimeChanged]);
 
@@ -125,6 +135,7 @@ export default function Track({
     boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
   };
 
+
   return (
     <div className={styles.track_container}>
       <Draggable
@@ -132,7 +143,7 @@ export default function Track({
         onDrag={handleDrag}
         position={position}
       >
-        <div className={styles.track_body} style={{ width: `${trackDuration * pixelsPerSecond}px` }}>
+        <div className={styles.track_body} style={{ width: duration * pixelsPerSecond }}>
           <div className={styles.track_name}>track name</div>
           <div className={styles.track_waveform}>
             <div ref={waveformRef} style={waveformStyle}></div>
