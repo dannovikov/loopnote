@@ -19,6 +19,7 @@
     margin-left: var(--editor-left-margin);
     overflow-y: auto;
     width: var(--project-width);
+    min-width: 100vw;
     /* overflow-x: scroll; */
 
 }

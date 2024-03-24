@@ -30,6 +30,8 @@ export default function Track({
   const lastStartTime = useRef(0);
   const [trackStartTimeChanged, setTrackStartTimeChanged] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [position, setPosition] = useState({ x: startTime * pixelsPerSecond, y: 0 });
+
 
   if (trackDuration === 0) {
     trackDuration = 319.075125;
@@ -58,40 +60,33 @@ export default function Track({
 
   // the main "play" and timing logic
   useEffect(() => {
-    const trackStartTimeSeconds = startTime;
-    const trackEndTimeSeconds = startTime + trackDuration;
     const playheadTimeSeconds = playheadPosition / pixelsPerSecond;
-    const playheadTimeRelativeToTrack = playheadTimeSeconds - trackStartTimeSeconds;
+    const playheadTimeRelativeToTrack = playheadTimeSeconds - startTime;
     console.log("playheadTimeRelativeToTrack: ", playheadTimeRelativeToTrack);
 
-    // handle when user drags a track relative to the playhead
-    if (trackStartTimeChanged) {
+    if (trackStartTimeChanged) { // due to dragging
       waveSurferRef.current.seekTo(Math.max(0,playheadTimeRelativeToTrack / trackDuration));
       setTrackStartTimeChanged(false);
-      if (playheadTimeRelativeToTrack <= 0) {
+      if (playheadTimeRelativeToTrack <= 0 || playheadTimeRelativeToTrack >= trackDuration) {
         waveSurferRef.current.pause();
         setIsPlaying(false);
       } 
-      if (playheadTimeRelativeToTrack >= trackDuration) {
-        waveSurferRef.current.pause();
-        setIsPlaying(false);
-      }
     }
 
     if (projectIsPlaying) {  
       if (playheadTimeRelativeToTrack >= 0 && playheadTimeRelativeToTrack <= trackDuration) {
-        if (!isPlaying) {
+        if (!isPlaying) { //if track is not playing
           waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / trackDuration);
           waveSurferRef.current.play();
           setIsPlaying(true);
-        } else { // isPlaying
+        } else { // if track is playing
           if (playheadChangeIsCausedByUser) { //not just time passing
             waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / trackDuration);
             setPlayheadChangeIsCausedByUser(false);
           }
         }
       }
-    } else { 
+    } else { // if project is not playing
       waveSurferRef.current.pause();
       setIsPlaying(false);
       waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / trackDuration);
@@ -99,7 +94,19 @@ export default function Track({
   }, [playheadPosition, projectIsPlaying, playheadChangeIsCausedByUser, trackStartTimeChanged]);
 
 
-  // Push track position updates to the database, at most once per second
+  // Function to handle dragging the track
+  const handleDrag = (e, data) => {
+    console.log("dragged to: ", data.x / pixelsPerSecond);
+    setStartTime(data.x / pixelsPerSecond);
+    setTrackStartTimeChanged(true);
+  };
+
+  // Update the track position when startTime or pixelsPerSecond changes
+  useEffect(() => {
+    setPosition({ x: startTime * pixelsPerSecond, y: 0 });
+  }, [startTime, pixelsPerSecond]);
+
+  // Push track position updates to the database
   useEffect(() => {
     const interval = setInterval(() => {
       if (startTime !== null && startTime !== lastStartTime.current) {
@@ -110,13 +117,6 @@ export default function Track({
     return () => clearInterval(interval);
   }, [startTime]);
 
-
-  // Function to handle dragging the track
-  const handleDrag = (e, data) => {
-    console.log("dragged to: ", data.x / pixelsPerSecond);
-    setStartTime(data.x / pixelsPerSecond);
-    setTrackStartTimeChanged(true);
-  };
 
   const waveformStyle = {
     backgroundColor: trackBodyColor,
@@ -129,8 +129,8 @@ export default function Track({
     <div className={styles.track_container}>
       <Draggable
         bounds="parent"
-        onStop={handleDrag}
-        defaultPosition={{ x: startTime * pixelsPerSecond, y: 0 }}
+        onDrag={handleDrag}
+        position={position}
       >
         <div className={styles.track_body} style={{ width: `${trackDuration * pixelsPerSecond}px` }}>
           <div className={styles.track_name}>track name</div>

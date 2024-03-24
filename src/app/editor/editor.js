@@ -32,12 +32,14 @@ const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
 export default function Editor({ currentProject, server }) {
   const [tracks, setTracks] = useState([]);
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false);
-  const [pixelsPerSecond, setPixelsPerSecond] = useState(30);
+  const [pixelsPerSecond, setPixelsPerSecond] = useState(3);
+  const [prevPixelsPerSecond, setPrevPixelsPerSecond] = useState(3); 
   const [playheadPosition, setPlayheadPosition] = useState(0);
   const [playheadChangeIsCausedByUser, setPlayheadChangeIsCausedByUser] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   
   // Effect to update the playhead position every 100ms when the audio is playing
+  //Todo: just make it based on time. not position.  or better yet manage both the time and the position. 
   useEffect(() => {
     if (isPlaying) {
       const interval = setInterval(() => {
@@ -45,7 +47,15 @@ export default function Editor({ currentProject, server }) {
       }, 100);
       return () => clearInterval(interval);
     }
-  }, [isPlaying]);
+  }, [isPlaying, pixelsPerSecond]);
+
+  // Effect to reposition the playhead when pixelsPerSecond changes
+  // TODO: save project PPS in the server
+  useEffect(() => {
+    setPlayheadPosition((prevPlayheadPosition) => prevPlayheadPosition * pixelsPerSecond / prevPixelsPerSecond);
+    setPrevPixelsPerSecond(pixelsPerSecond); 
+  }, [pixelsPerSecond]);
+
 
   // Effect to change the tracks when the current project changes
   useEffect(() => {
@@ -57,25 +67,46 @@ export default function Editor({ currentProject, server }) {
     setTracks(newTracks);
   }, [currentProject]);
 
+  // Effect to trigger play/pause when the space bar is pressed
+  useEffect(() => {
+    const togglePlay = (event) => {
+        if (event.code === "Space" ) {
+            event.preventDefault();  // Prevent scrolling and other side effects
+            setIsPlaying(currentIsPlaying => !currentIsPlaying);
+        }
+    };
+
+    document.addEventListener("keydown", togglePlay);
+
+    return () => {
+        document.removeEventListener("keydown", togglePlay);
+    };
+}, []); 
+
+
   // function to update the start time of a track when it is dragged to a new position
   const dbUpdateTrackStartTime = (projectId, trackId, startTime) => {
     server[`project${projectId}`][`track${trackId}`]["startTime"] = startTime;
   };
+
 
   //function to update the duration of a track when waveSurfer loads it
   const dbUpdateTrackDuration = (projectId, trackId, duration) => {
     server[`project${projectId}`][`track${trackId}`]["duration"] = duration;
   };
 
+
   // function to close the new track options when clicking outside of the track options
   const closeOptions = () => {
     setTrackOptionsOpen(false);
   };
 
+
   // function to open the file explorer when clicking the upload button
   const openFileExplorer = (event) => {
     document.getElementById("uploadButtonFileInput").click();
   };
+
 
   // function to handle the file input when a file is selected
   const handleFileInput = (event) => {
@@ -118,8 +149,7 @@ export default function Editor({ currentProject, server }) {
     setTracks([...tracks, newTrack]);
   };
 
-  // function to play the audio of a track, called when the play button is clicked and is based on the track's start time and the playhead position
-  // should it be in the track component? or in the editor component? 
+  
 
   return (
     <div className={styles.editor_area} onClick={closeOptions}>

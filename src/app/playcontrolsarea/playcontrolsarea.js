@@ -14,7 +14,7 @@ export default function PlayControlsArea({ntb_trackOptionsOpen,ntb_setTrackOptio
                 openFileExplorer={ntb_openFileExplorer}
             /> */}
             <PlayControls isPlaying={isPlaying} setIsPlaying={setIsPlaying} setPlayheadPosition={setPlayheadPosition} projectContentEndPosition={projectContentEndPosition}  setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}/>
-            <ZoomSlider setPixelsPerSecond={setPixelsPerSecond}/>
+            <ZoomSlider setPixelsPerSecond={setPixelsPerSecond} projectIsPlaying={isPlaying}/>
         </div>
     );
 }
