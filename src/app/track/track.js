@@ -31,6 +31,11 @@ export default function Track({
   const [trackStartTimeChanged, setTrackStartTimeChanged] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  if (trackDuration === 0) {
+    trackDuration = 319.075125;
+    console.log("trackDuration is 0, setting to 319.075125");
+  }
+
   // A one-time effect to intialize the waveform
   useEffect(() => {
     waveSurferRef.current = WaveSurfer.create({
@@ -58,6 +63,7 @@ export default function Track({
     const playheadTimeSeconds = playheadPosition / pixelsPerSecond;
     const playheadTimeRelativeToTrack = playheadTimeSeconds - trackStartTimeSeconds;
     console.log("playheadTimeRelativeToTrack: ", playheadTimeRelativeToTrack);
+
     // handle when user drags a track relative to the playhead
     if (trackStartTimeChanged) {
       waveSurferRef.current.seekTo(Math.max(0,playheadTimeRelativeToTrack / trackDuration));
@@ -85,14 +91,12 @@ export default function Track({
           }
         }
       }
-    } else {
+    } else { 
       waveSurferRef.current.pause();
       setIsPlaying(false);
       waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / trackDuration);
     }
   }, [playheadPosition, projectIsPlaying, playheadChangeIsCausedByUser, trackStartTimeChanged]);
-
-
 
 
   // Push track position updates to the database, at most once per second
@@ -105,6 +109,7 @@ export default function Track({
     }, 250); // Update at most 4x per second
     return () => clearInterval(interval);
   }, [startTime]);
+
 
   // Function to handle dragging the track
   const handleDrag = (e, data) => {
