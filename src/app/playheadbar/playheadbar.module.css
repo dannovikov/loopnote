@@ -17,7 +17,7 @@
     height: 100%; /* Full height of its container */
     background-color: #ffffff60; /* Color of the playhead */
     position: absolute;
-    transition: left 0.1s;
+    /* transition: left 0.1s; */
     z-index: 1;
     
 

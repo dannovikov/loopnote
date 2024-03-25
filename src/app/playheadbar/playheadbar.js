@@ -8,8 +8,9 @@ export default function PlayHeadBar({playheadPosition, setPlayheadPosition, setP
         setPlayheadPosition(clickX);
         setPlayheadChangeIsCausedByUser(true);
     }
+
     return (
-        <div className={styles.playheadbar} onClick={handleClick}>
+        <div className={styles.playheadbar} onMouseDown={handleClick}>
             <div className={styles.playhead} style={{left: `${playheadPosition}px`}}></div>
         </div>
     );

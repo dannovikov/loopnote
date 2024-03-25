@@ -50,7 +50,7 @@ export default function Editor({ currentProject, server }) {
   }, [isPlaying, pixelsPerSecond]);
 
   // Effect to reposition the playhead when pixelsPerSecond changes
-  // TODO: save project PPS in the server
+  // TODO: save project PPS in the server with each project
   useEffect(() => {
     setPlayheadPosition((prevPlayheadPosition) => prevPlayheadPosition * pixelsPerSecond / prevPixelsPerSecond);
     setPrevPixelsPerSecond(pixelsPerSecond); 
@@ -81,7 +81,28 @@ export default function Editor({ currentProject, server }) {
     return () => {
         document.removeEventListener("keydown", togglePlay);
     };
-}, []); 
+  }, []); 
+
+
+  // Effect to handle zooming in and out with the shift key and scroll wheel
+  useEffect(() => {
+    const handleScroll = (event) => {
+        if (!isPlaying && event.shiftKey) {
+            // Prevent the default scroll behavior
+            event.preventDefault();
+            
+            // Adjust zoom level based on scroll direction
+            setPixelsPerSecond((prev) => {
+                const delta = event.deltaY < 0 ? -1 : 1; // Determine scroll direction
+                return Math.max(1, Math.min(100, prev + delta)); // Ensure new value is within range
+            });
+        }
+    };
+    window.addEventListener('wheel', handleScroll, { passive: false });
+    return () => {
+        window.removeEventListener('wheel', handleScroll);
+    };
+  }, [setPixelsPerSecond, isPlaying]);
 
 
   // function to update the start time of a track when it is dragged to a new position
