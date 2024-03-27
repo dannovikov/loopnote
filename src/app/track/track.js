@@ -122,7 +122,7 @@ export default function Track({
     if (isRecording) {
 
       let record = waveSurferRef.current.registerPlugin(RecordPlugin.create({
-        audioBitsPerSecond: 128000,
+        
       }));
       record.startRecording();
       setProjectIsPlaying(true);
@@ -201,8 +201,6 @@ export default function Track({
 
 
   const displayWidth = isRecording ? recordingTime+duration : duration;
-  console.log(displayWidth, recordingTime, duration)
-
 
   return (
     <div className={styles.track_container}>
