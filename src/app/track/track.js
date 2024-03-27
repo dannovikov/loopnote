@@ -129,10 +129,10 @@ export default function Track({
         
       }));
       record.startRecording();
-      setProjectIsPlaying(true);
 
       let interval;
       record.on('record-start', () => {
+        setProjectIsPlaying(true);
         console.log("recording started")
         const interval = setInterval(() => {
           if (isRecording) {
