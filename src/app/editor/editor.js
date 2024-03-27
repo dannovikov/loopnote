@@ -23,6 +23,8 @@ const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
       startTime: trackData.startTime,
       duration: trackData.duration,
       dbUpdateTrackStartTime: dbUpdateTrackStartTime,
+      isRecording: false,
+      volume: 100,
     };
     tracks.push(track);
   }
@@ -37,6 +39,7 @@ export default function Editor({ currentProject, server }) {
   const [playheadPosition, setPlayheadPosition] = useState(0);
   const [playheadChangeIsCausedByUser, setPlayheadChangeIsCausedByUser] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [projectVolume, setProjectVolume] = useState(50);
   
   // Effect to update the playhead position every 100ms when the audio is playing
   //Todo: just make it based on time. not position.  or better yet manage both the time and the position. 
@@ -171,6 +174,7 @@ export default function Editor({ currentProject, server }) {
       duration: 0,
       dbUpdateTrackStartTime: dbUpdateTrackStartTime,
       isRecording: false,
+      volume: 100,
     };
     setTracks([...tracks, newTrack]);
   };
@@ -199,6 +203,7 @@ export default function Editor({ currentProject, server }) {
       duration: 0,
       dbUpdateTrackStartTime: dbUpdateTrackStartTime,
       isRecording: true,
+      volume: 100,
     };
     setTracks([...tracks, newTrack]);
     // setIsPlaying(true);
@@ -232,6 +237,7 @@ export default function Editor({ currentProject, server }) {
                 trackBodyColor={track.trackBodyColor}
                 trackWaveColor={track.trackWaveColor}
                 trackIsRecording={track.isRecording}
+                trackVolume={track.volume}
                 dbUpdateTrackStartTime={dbUpdateTrackStartTime}
                 dbUpdateTrackDuration={dbUpdateTrackDuration}
                 dbUpdateTrackLink={dbUpdateTrackLink}
@@ -241,6 +247,7 @@ export default function Editor({ currentProject, server }) {
                 setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}
                 projectIsPlaying={isPlaying}
                 setProjectIsPlaying={setIsPlaying}
+                projectVolume={projectVolume}
               />
             );
           })}
@@ -263,6 +270,7 @@ export default function Editor({ currentProject, server }) {
         setPlayheadPosition={setPlayheadPosition}
         setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}
         setPixelsPerSecond={setPixelsPerSecond}
+        setProjectVolume={setProjectVolume}
       />
     </div>
   );

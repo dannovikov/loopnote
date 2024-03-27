@@ -19,6 +19,7 @@ export default function Track({
   trackBodyColor,
   trackWaveColor,
   trackIsRecording,
+  trackVolume,
   dbUpdateTrackStartTime,
   dbUpdateTrackDuration,
   dbUpdateTrackLink,
@@ -28,6 +29,7 @@ export default function Track({
   setPlayheadChangeIsCausedByUser,
   projectIsPlaying,
   setProjectIsPlaying,
+  projectVolume,
 }) {
   const waveSurferRef = useRef(null);
   const waveformRef = useRef(null);
@@ -44,13 +46,15 @@ export default function Track({
 
   const [recordingTime, setRecordingTime] = useState(-4.5);
 
+  const [volume, setVolume] = useState(trackVolume);
+
 
   // Intialize wavesurfer
   useEffect(() => {
     waveSurferRef.current = WaveSurfer.create({
       container: waveformRef.current,
       waveColor: trackWaveColor,
-      progressColor: trackBodyColor, //trackWaveColor
+      progressColor: trackWaveColor, //trackBodyColor, //
       interact: false,
       height: 100,
       cursorWidth: 0,
@@ -162,8 +166,12 @@ export default function Track({
   }, [isRecording]);
 
 
-
-
+  // handle volume changes
+  useEffect(() => {
+    console.log("volume: ", volume);
+    console.log("projectVolume: ", projectVolume);
+    waveSurferRef.current.setVolume((volume / 100) * (projectVolume / 100));
+  }, [projectVolume]);
 
 
   // Function to handle dragging the track
