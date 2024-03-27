@@ -14,8 +14,10 @@
   box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2); /* Subtle drop shadow */
 }
   
-  .button {
-  }
+  
+.buttonContainer:active {
+  background-color: #cccccc; /* Light gray background */
+}
   
   .button svg {
     margin-top: 2px;

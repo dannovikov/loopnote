@@ -21,6 +21,16 @@
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2); /* Subtle drop shadow */
 }
 
+/* when the button is clicked, it gets assigned the pushed class*/
+.controlbutton.pushed {
+    background-color: #d1d1d1; /* Light gray background */
+}
+
+.controlbutton:active {
+    background-color: #cccccc; /* Light gray background */
+}
+
+
 .controlbutton svg {
     margin-top: 2px;
     width: 29px;  /* Set the desired width */
