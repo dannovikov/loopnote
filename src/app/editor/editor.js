@@ -32,8 +32,8 @@ const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
 export default function Editor({ currentProject, server }) {
   const [tracks, setTracks] = useState([]);
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false);
-  const [pixelsPerSecond, setPixelsPerSecond] = useState(2);
-  const [prevPixelsPerSecond, setPrevPixelsPerSecond] = useState(2); 
+  const [pixelsPerSecond, setPixelsPerSecond] = useState(5);
+  const [prevPixelsPerSecond, setPrevPixelsPerSecond] = useState(5); 
   const [playheadPosition, setPlayheadPosition] = useState(0);
   const [playheadChangeIsCausedByUser, setPlayheadChangeIsCausedByUser] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -116,6 +116,10 @@ export default function Editor({ currentProject, server }) {
     server[`project${projectId}`][`track${trackId}`]["duration"] = duration;
   };
 
+  // function to update the link of a track when it is uploaded
+  const dbUpdateTrackLink = (projectId, trackId, link) => {
+    server[`project${projectId}`][`track${trackId}`]["link"] = link;
+  };
 
   // function to close the new track options when clicking outside of the track options
   const closeOptions = () => {
@@ -166,20 +170,50 @@ export default function Editor({ currentProject, server }) {
       startTime: 0,
       duration: 0,
       dbUpdateTrackStartTime: dbUpdateTrackStartTime,
+      isRecording: false,
     };
     setTracks([...tracks, newTrack]);
   };
 
+
+  // function to handle recording new tracks
+  const recordNewTrack = () => {
+    // create a new server entry for the new track
+    server[`project${currentProject.id}`][`track${tracks.length}`] = {
+      name: "Recording",
+      link: null,
+      trackBodyColor: "#C98161",
+      trackWaveColor: "#A3684E",
+      startTime: playheadPosition / pixelsPerSecond,
+      duration: 0,
+    };
+    // create a new recording track object and add it to the tracks array
+    const newTrack = {
+      id: tracks.length,
+      projectId: currentProject.id,
+      name: "Recording",
+      link: null,
+      trackBodyColor: "#C98161",
+      trackWaveColor: "#A3684E",
+      startTime: playheadPosition / pixelsPerSecond,
+      duration: 0,
+      dbUpdateTrackStartTime: dbUpdateTrackStartTime,
+      isRecording: true,
+    };
+    setTracks([...tracks, newTrack]);
+    // setIsPlaying(true);
+
+    // // close the track options
+    // closeOptions();
+
+  };
   
 
   return (
     <div className={styles.editor_area} onClick={closeOptions}>
       <Header name={currentProject.name} />
       <div className={styles.editor_centering_container}>
-        <div
-          className={styles.editor}
-          style={{ width: `${500 * pixelsPerSecond}px` }} //Todo: dynamic resizing
-        >
+        <div className={styles.editor} style={{ width: `${500 * pixelsPerSecond}px` }} >
           <PlayHeadBar
             playheadPosition={playheadPosition}
             setPlayheadPosition={setPlayheadPosition}
@@ -197,13 +231,16 @@ export default function Editor({ currentProject, server }) {
                 trackStartTime={track.startTime}
                 trackBodyColor={track.trackBodyColor}
                 trackWaveColor={track.trackWaveColor}
+                trackIsRecording={track.isRecording}
                 dbUpdateTrackStartTime={dbUpdateTrackStartTime}
                 dbUpdateTrackDuration={dbUpdateTrackDuration}
+                dbUpdateTrackLink={dbUpdateTrackLink}
                 pixelsPerSecond={pixelsPerSecond}
                 playheadPosition={playheadPosition}
                 playheadChangeIsCausedByUser={playheadChangeIsCausedByUser}
                 setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}
                 projectIsPlaying={isPlaying}
+                setProjectIsPlaying={setIsPlaying}
               />
             );
           })}
@@ -212,6 +249,7 @@ export default function Editor({ currentProject, server }) {
             setTrackOptionsOpen={setTrackOptionsOpen}
             handleFileInput={handleFileInput}
             openFileExplorer={openFileExplorer}
+            recordNewTrack={recordNewTrack}
           />
         </div>
       </div>

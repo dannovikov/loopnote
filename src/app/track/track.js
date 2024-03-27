@@ -3,8 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './track.module.css'
 import WaveSurfer from 'wavesurfer.js';
-import Draggable from 'react-draggable'; // The default
+// import 'wavesurfer.js/dist/plugin/wavesurfer.timeline.min.js';
+import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js'
 
+import Draggable from 'react-draggable'; // The default
 
 
 export default function Track({
@@ -16,26 +18,34 @@ export default function Track({
   trackStartTime,
   trackBodyColor,
   trackWaveColor,
+  trackIsRecording,
   dbUpdateTrackStartTime,
   dbUpdateTrackDuration,
+  dbUpdateTrackLink,
   pixelsPerSecond,
   playheadPosition,
   playheadChangeIsCausedByUser,
   setPlayheadChangeIsCausedByUser,
   projectIsPlaying,
+  setProjectIsPlaying,
 }) {
   const waveSurferRef = useRef(null);
   const waveformRef = useRef(null);
+
   const [startTime, setStartTime] = useState(Number(trackStartTime));
   const lastStartTime = useRef(0);
   const [trackStartTimeChanged, setTrackStartTimeChanged] = useState(false);
+
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isRecording, setIsRecording] = useState(trackIsRecording);
+
   const [position, setPosition] = useState({ x: startTime * pixelsPerSecond, y: 0 });
-  const [duration, setDuration] = useState(trackDuration);
-  
+  const [duration, setDuration] = useState(trackDuration > 0 ? trackDuration : 5);
+
+  const [recordingTime, setRecordingTime] = useState(-4.5);
 
 
-  // A one-time effect to intialize the waveform
+  // Intialize wavesurfer
   useEffect(() => {
     waveSurferRef.current = WaveSurfer.create({
       container: waveformRef.current,
@@ -48,7 +58,6 @@ export default function Track({
     waveSurferRef.current.load(
       link ? link : "https://ia800806.us.archive.org/2/items/kcgetdown/kcgetdown.mp3"
     );
-    // print track duration deduced by the waveSurfer
     waveSurferRef.current.on('ready', function () {
       const waveDuration = waveSurferRef.current.getDuration();
       setDuration(waveDuration);
@@ -56,11 +65,12 @@ export default function Track({
     });
   }, []);
 
+
   // the main "play" and timing logic
   useEffect(() => {
     const playheadTimeSeconds = playheadPosition / pixelsPerSecond;
     const playheadTimeRelativeToTrack = playheadTimeSeconds - startTime;
-    console.log("playheadTimeRelativeToTrack: ", playheadTimeRelativeToTrack);
+    // console.log("playheadTimeRelativeToTrack: ", playheadTimeRelativeToTrack);
 
     if (trackStartTimeChanged) { // due to dragging
       waveSurferRef.current.seekTo(Math.max(0,playheadTimeRelativeToTrack / duration));
@@ -70,38 +80,90 @@ export default function Track({
         setIsPlaying(false);
       } 
     }
-
     if (projectIsPlaying) {  
       if (playheadTimeRelativeToTrack >= 0 && playheadTimeRelativeToTrack <= duration) {
-        if (!isPlaying) { //if track is not playing
+        if (!isPlaying && !isRecording) { //if track is not playing, start playing it
           waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / duration);
           waveSurferRef.current.play();
           setIsPlaying(true);
-        } else { // if track is playing
+        } else { // if playhead moves while track is playing, synchronize the track with the playhead
           if (playheadChangeIsCausedByUser) { //not just time passing
             waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / duration);
             setPlayheadChangeIsCausedByUser(false);
           }
         }
-
-      } else { // if playhead is outside of track
-        // console.log("playhead is outside of track", playheadTimeRelativeToTrack, trackDuration, playheadTimeSeconds, startTime, duration);
+      } else { // if playhead is outside of track, pause the track
         waveSurferRef.current.pause();
-        waveSurferRef.current.seekTo(0);
+        try{
+          waveSurferRef.current.seekTo(0);
+        } catch (e) {
+          console.log("error seeking to 0");
+          console.log("playheadTimeRelativeToTrack: ", playheadTimeRelativeToTrack);
+          console.log("duration: ", duration);
+        }
         setIsPlaying(false);
       }
-
-    } else { // if project is not playing
+    } else { // if project is not playing, pause the track and synchronize the track with the playhead
       waveSurferRef.current.pause();
-      setIsPlaying(false);
-      if (duration != 0) {
-        waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / duration);
-      } else {
-        waveSurferRef.current.seekTo(0);
+      try {
+        waveSurferRef.current.seekTo(duration > 0 ? playheadTimeRelativeToTrack / duration : 0);
+      } catch (e) {
+        console.log("error seeking to", playheadTimeRelativeToTrack / duration);
+        console.log("playheadTimeRelativeToTrack: ", playheadTimeRelativeToTrack);
+        console.log("duration: ", duration);
       }
-      
+      setIsPlaying(false);
     }
-  }, [playheadPosition, projectIsPlaying, playheadChangeIsCausedByUser, trackStartTimeChanged]);
+  }, [playheadPosition, projectIsPlaying, playheadChangeIsCausedByUser, trackStartTimeChanged, isRecording]);
+
+
+  // Recording logic
+  useEffect(() => {
+    if (isRecording) {
+
+      let record = waveSurferRef.current.registerPlugin(RecordPlugin.create({
+        audioBitsPerSecond: 128000,
+      }));
+      record.startRecording();
+      setProjectIsPlaying(true);
+
+      let interval;
+      record.on('record-start', () => {
+        console.log("recording started")
+        const interval = setInterval(() => {
+          if (isRecording) {
+            setRecordingTime((prevRecordingTime) => prevRecordingTime + 1);
+          }
+        }, 1000); 
+      });
+      // useEffect(() => {
+
+
+      // }, [isRecording]);
+
+      record.on('record-end', (blob) => {
+        const recordedUrl = URL.createObjectURL(blob);
+        console.log("recording ended", recordedUrl);
+        setIsRecording(false);
+        dbUpdateTrackLink(projectId, id, recordedUrl);
+      });
+
+      // listen for "r" key to stop recording
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'r') {
+          if (isRecording) {
+            record.stopRecording();
+            setIsRecording(false);
+          }
+        }
+      });
+      return () => clearInterval(interval);
+    }
+  }, [isRecording]);
+
+
+
+
 
 
   // Function to handle dragging the track
@@ -111,10 +173,12 @@ export default function Track({
     setTrackStartTimeChanged(true);
   };
 
+
   // Update the track position when startTime or pixelsPerSecond changes
   useEffect(() => {
     setPosition({ x: startTime * pixelsPerSecond, y: 0 });
   }, [startTime, pixelsPerSecond]);
+
 
   // Push track position updates to the database
   useEffect(() => {
@@ -136,6 +200,10 @@ export default function Track({
   };
 
 
+  const displayWidth = isRecording ? recordingTime+duration : duration;
+  console.log(displayWidth, recordingTime, duration)
+
+
   return (
     <div className={styles.track_container}>
       <Draggable
@@ -143,7 +211,7 @@ export default function Track({
         onDrag={handleDrag}
         position={position}
       >
-        <div className={styles.track_body} style={{ width: duration * pixelsPerSecond }}>
+        <div className={styles.track_body} style={{ width: displayWidth * pixelsPerSecond }}>
           <div className={styles.track_name}>track name</div>
           <div className={styles.track_waveform}>
             <div ref={waveformRef} style={waveformStyle}></div>

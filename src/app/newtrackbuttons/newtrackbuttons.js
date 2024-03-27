@@ -5,11 +5,11 @@ import UploadButton from './uploadButton/uploadButton';
 import RecordButton from './recordButton/recordButton';
 import LinkButton from './linkbutton/linkButton';
 
-export default function NewTrackButtons({trackOptionsOpen, setTrackOptionsOpen, handleFileInput, openFileExplorer}) {
+export default function NewTrackButtons({trackOptionsOpen, setTrackOptionsOpen, handleFileInput, openFileExplorer, recordNewTrack}) {
     return (
         <div className={styles.new_track_container}>
             <NewTrackButton trackOptionsOpen={trackOptionsOpen} setTrackOptionsOpen={setTrackOptionsOpen} />
-            <RecordButton isVisible={trackOptionsOpen} />
+            <RecordButton isVisible={trackOptionsOpen} recordNewTrack={recordNewTrack} />
             <input type="file" id="uploadButtonFileInput" style={{ display: "none" }} onChange={handleFileInput} />
             <UploadButton isVisible={trackOptionsOpen} openFileExplorer={openFileExplorer} />
             <LinkButton isVisible={trackOptionsOpen} />
