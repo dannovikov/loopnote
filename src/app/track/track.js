@@ -140,10 +140,6 @@ export default function Track({
           }
         }, 1000); 
       });
-      // useEffect(() => {
-
-
-      // }, [isRecording]);
 
       record.on('record-end', (blob) => {
         const recordedUrl = URL.createObjectURL(blob);

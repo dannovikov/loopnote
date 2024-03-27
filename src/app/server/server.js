@@ -1,5 +1,7 @@
 let server = {
     "project0": {
+    },
+    "project1": {
       "track0": {
         "startTime": 0,
         "duration": 319.075125,
@@ -26,7 +28,7 @@ let server = {
       }
     },
   
-    "project1": {
+    "project2": {
       "track0": {
         "startTime": 0,
         "duration": 319.075125,
@@ -47,7 +49,7 @@ let server = {
       },
     },
   
-    "project2": {
+    "project3": {
       "track0": {
         "startTime": 0,
         "duration": 319.075125,
@@ -72,8 +74,6 @@ let server = {
         "trackBodyColor": "#7348B7",
         "trackWaveColor": "#5E3B92"
       },
-    },
-    "project3": {
     },
   }
 
