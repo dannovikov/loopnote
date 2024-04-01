@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Crunker from "crunker";
 import styles from "./editor.module.css";
 import Header from "../header/header";
 import PlayHeadBar from "../playheadbar/playheadbar";
 import Track from "../track/track";
 import PlayControlsArea from "../playcontrolsarea/playcontrolsarea";
 import NewTrackButtons from "../newtrackbuttons/newtrackbuttons";
+
 
 // Function to fetch the tracks of a project from the server
 const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
@@ -31,6 +33,7 @@ const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
   return tracks;
 };
 
+
 export default function Editor({ currentProject, server }) {
   const [tracks, setTracks] = useState([]);
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false);
@@ -41,6 +44,7 @@ export default function Editor({ currentProject, server }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [projectVolume, setProjectVolume] = useState(50);
   
+
   // Effect to update the playhead position every 100ms when the audio is playing
   //Todo: just make it based on time. not position.  or better yet manage both the time and the position. 
   useEffect(() => {
@@ -52,6 +56,7 @@ export default function Editor({ currentProject, server }) {
     }
   }, [isPlaying, pixelsPerSecond]);
 
+  
   // Effect to reposition the playhead when pixelsPerSecond changes
   // TODO: save project PPS in the server with each project
   useEffect(() => {
@@ -69,6 +74,7 @@ export default function Editor({ currentProject, server }) {
     );
     setTracks(newTracks);
   }, [currentProject]);
+
 
   // Effect to trigger play/pause when the space bar is pressed
   useEffect(() => {
@@ -97,7 +103,6 @@ export default function Editor({ currentProject, server }) {
   useEffect(() => {
     const handleScroll = (event) => {
         if (!isPlaying && event.shiftKey) {
-            // Prevent the default scroll behavior
             event.preventDefault();
             
             // Adjust zoom level based on scroll direction
@@ -117,18 +122,41 @@ export default function Editor({ currentProject, server }) {
   // function to update the start time of a track when it is dragged to a new position
   const dbUpdateTrackStartTime = (projectId, trackId, startTime) => {
     server[`project${projectId}`][`track${trackId}`]["startTime"] = startTime;
+    // find the track with matching id in tracks and update the start time
+    const newTracks = tracks.map((track) => {
+      if (track.id === trackId) {
+        track.startTime = startTime;
+      }
+      return track;
+    });
   };
 
 
   //function to update the duration of a track when waveSurfer loads it
   const dbUpdateTrackDuration = (projectId, trackId, duration) => {
     server[`project${projectId}`][`track${trackId}`]["duration"] = duration;
+    const newTracks = tracks.map((track) => {
+      if (track.id === trackId) {
+        track.duration = duration;
+      }
+      return track;
+    });
   };
+
 
   // function to update the link of a track when it is uploaded
   const dbUpdateTrackLink = (projectId, trackId, link) => {
     server[`project${projectId}`][`track${trackId}`]["link"] = link;
+    // find the track with matching id in tracks and update the link
+    const newTracks = tracks.map((track) => {
+      if (track.id === trackId) {
+        track.link = link;
+      }
+      return track;
+    });
+
   };
+
 
   // function to close the new track options when clicking outside of the track options
   const closeOptions = () => {
@@ -212,17 +240,40 @@ export default function Editor({ currentProject, server }) {
       volume: 100,
     };
     setTracks([...tracks, newTrack]);
-    // setIsPlaying(true);
+  };
 
-    // // close the track options
-    // closeOptions();
+  // function to export the project as an mp3 file
+  const exportProjectAsMp3 = async () => {
+    const crunker = new Crunker();
+    const buffers = await crunker.fetchAudio(...tracks.map(track => track.link));
 
+    const paddedBuffers = buffers.map((buffer, index) => {
+      const track = tracks[index];
+      // Pad the start of each track with silence up to its start time
+      return crunker.padAudio(buffer, 0, track.startTime);
+    });
+
+    const mergedBuffer = crunker.mergeAudio(paddedBuffers);
+
+    const { blob } = crunker.export(mergedBuffer, 'audio/mp3');
+    
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary download link and click it
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = 'final_project.mp3';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  
+    URL.revokeObjectURL(url);
   };
   
 
   return (
     <div className={styles.editor_area} onClick={closeOptions}>
-      <Header name={currentProject.name} />
+      <Header name={currentProject.name} exportProjectAsMp3={exportProjectAsMp3} />
       <div className={styles.editor_centering_container}>
         <div className={styles.editor} style={{ width: `${500 * pixelsPerSecond}px` }} >
           <PlayHeadBar

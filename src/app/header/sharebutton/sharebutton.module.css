@@ -1,0 +1,3 @@
+.sharebutton {
+    margin-right: calc(var(--editor-left-margin)*2);
+}

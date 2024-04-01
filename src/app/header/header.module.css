@@ -3,7 +3,7 @@
     flex-direction: row;
     height: var(--header-height);
     width: 100%;
-    justify-content: left;
+    justify-content: space-between;
     background-color: #DBDBDB;
     align-items: center;
     margin-left: var(--editor-left-margin);
