@@ -75,7 +75,13 @@ export default function Editor({ currentProject, server }) {
     const togglePlay = (event) => {
         if (event.code === "Space" ) {
             event.preventDefault();  // Prevent scrolling and other side effects
-            setIsPlaying(currentIsPlaying => !currentIsPlaying);
+            setIsPlaying(currentIsPlaying =>{
+              const newState = !currentIsPlaying;
+              const eventName = newState ? "project-play" : "project-pause";
+              document.dispatchEvent( new CustomEvent(eventName) );
+              return newState;
+
+            } );
         }
     };
 

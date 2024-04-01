@@ -48,6 +48,8 @@ export default function Track({
 
   const [volume, setVolume] = useState(trackVolume);
 
+  const [url, setUrl] = useState(link);
+
 
   // Intialize wavesurfer
   useEffect(() => {
@@ -59,9 +61,9 @@ export default function Track({
       height: 100,
       cursorWidth: 0,
     });
-    waveSurferRef.current.load(
-      link ? link : "https://ia800806.us.archive.org/2/items/kcgetdown/kcgetdown.mp3"
-    );
+    if (url) {
+      waveSurferRef.current.load(url);
+    }    
     waveSurferRef.current.on('ready', function () {
       const waveDuration = waveSurferRef.current.getDuration();
       setDuration(waveDuration);
@@ -124,12 +126,12 @@ export default function Track({
   // Recording logic
   useEffect(() => {
     if (isRecording) {
-
       let record = waveSurferRef.current.registerPlugin(RecordPlugin.create({
-        
+        audioBitsPerSecond: 128000,
       }));
       record.startRecording();
-
+      
+      // grow the track body while recording
       let interval;
       record.on('record-start', () => {
         setProjectIsPlaying(true);
@@ -140,14 +142,16 @@ export default function Track({
           }
         }, 1000); 
       });
-
+      
+      // update the track url when recording ends
       record.on('record-end', (blob) => {
         const recordedUrl = URL.createObjectURL(blob);
         console.log("recording ended", recordedUrl);
         setIsRecording(false);
         dbUpdateTrackLink(projectId, id, recordedUrl);
+        setUrl(recordedUrl);
       });
-
+      
       // listen for "r" key to stop recording
       document.addEventListener('keydown', (e) => {
         if (e.key === 'r') {
@@ -157,6 +161,16 @@ export default function Track({
           }
         }
       });
+
+      // listen for "project-pause" event to stop recording
+      document.addEventListener('project-pause', () => {
+        if (isRecording) {
+          record.stopRecording();
+          setIsRecording(false);
+        }
+      }); 
+      
+      
       return () => clearInterval(interval);
     }
   }, [isRecording]);
@@ -168,14 +182,6 @@ export default function Track({
     console.log("projectVolume: ", projectVolume);
     waveSurferRef.current.setVolume((volume / 100) * (projectVolume / 100));
   }, [projectVolume]);
-
-
-  // Function to handle dragging the track
-  const handleDrag = (e, data) => {
-    console.log("dragged to: ", data.x / pixelsPerSecond);
-    setStartTime(data.x / pixelsPerSecond);
-    setTrackStartTimeChanged(true);
-  };
 
 
   // Update the track position when startTime or pixelsPerSecond changes
@@ -196,6 +202,14 @@ export default function Track({
   }, [startTime]);
 
 
+  // Function to handle dragging the track
+  const handleDrag = (e, data) => {
+    console.log("dragged to: ", data.x / pixelsPerSecond);
+    setStartTime(data.x / pixelsPerSecond);
+    setTrackStartTimeChanged(true);
+  };
+  
+  
   const waveformStyle = {
     backgroundColor: trackBodyColor,
     height: "100%",
