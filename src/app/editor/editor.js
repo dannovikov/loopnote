@@ -256,13 +256,13 @@ export default function Editor({ currentProject, server }) {
     const mergedBuffer = crunker.mergeAudio(paddedBuffers);
 
     const { blob } = crunker.export(mergedBuffer, 'audio/mp3');
-    
+
     const url = URL.createObjectURL(blob);
 
     // Create a temporary download link and click it
     const downloadLink = document.createElement('a');
     downloadLink.href = url;
-    downloadLink.download = 'final_project.mp3';
+    downloadLink.download = `${currentProject.name}_loopnote.mp3`;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
