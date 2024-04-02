@@ -4,6 +4,8 @@ export default function PlayControls({isPlaying, setIsPlaying, setPlayheadPositi
   const togglePlay = () => {
     console.log("toggle play to: ", !isPlaying);
     setIsPlaying(!isPlaying);
+    const eventName = isPlaying ? "project-play" : "project-pause";
+    document.dispatchEvent( new CustomEvent(eventName) );
   }
 
   const jumpToStart = () => {

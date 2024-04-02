@@ -10,6 +10,7 @@ import PlayControlsArea from "../playcontrolsarea/playcontrolsarea";
 import NewTrackButtons from "../newtrackbuttons/newtrackbuttons";
 
 import { getFirestore, addDoc, collection, getDocs, getDoc, doc, updateDoc } from "firebase/firestore";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function Editor({ currentProject }) { //currentProject is the document id of the current project
   const [tracks, setTracks] = useState([]);
@@ -22,6 +23,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   const [projectVolume, setProjectVolume] = useState(50);
 
   const db = getFirestore();
+  const storage = getStorage();
   
   // Effect to update the playhead position every 100ms when the audio is playing
   useEffect(() => {
@@ -45,15 +47,18 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   // Effect to change the tracks when the current project changes
   useEffect(() => {
     async function getTracks() {
+      // Get the tracks from the current project in the database
       const projectRef = doc(db, "projects", currentProject.id);
       const projectDoc = await getDoc(projectRef);
       const projectData = projectDoc.data();
       if (!projectData) {return;}
       const tracksData = projectData.tracks;
+      // create track objects from the data
       const tracksArray = Object.keys(tracksData).map((key) => {
         return {
           id: key,
           projectId: currentProject.id,
+          position: tracksData[key].position,
           name: tracksData[key].name,
           link: tracksData[key].link,
           trackBodyColor: tracksData[key].trackBodyColor,
@@ -63,7 +68,10 @@ export default function Editor({ currentProject }) { //currentProject is the doc
           isRecording: false,
           volume: 100,
         };
-      });       
+
+      });      
+      // sort tracksArray by position
+      tracksArray.sort((a, b) => a.position - b.position); 
       setTracks(tracksArray);
     }
     getTracks();
@@ -112,26 +120,10 @@ export default function Editor({ currentProject }) { //currentProject is the doc
 
 
   const dbUpdateTrack = async (field, value, projectId, trackId) => {
-    console.log("attempting to update: ", field, value, projectId, trackId)
-    /*
-    Access within a track object record, you have the following available fields:
-      - name (todo)
-      - duration
-      - link
-      - startTime
-      - trackBodyColor
-      - trackWaveColor
-    */
     const projectRef = doc(db, "projects", projectId);
     const trackField = `tracks.${trackId}.${field}`;
-    // try {
     await updateDoc(projectRef, { [trackField]: value });
     console.log(`${field} updated`);
-    // }
-    // catch (e) {
-    //   console.error(e);
-    // }
-
     setTracks((currentTracks) =>
       currentTracks.map((track) =>
         track.id === trackId ? { ...track, [field]: value } : track
@@ -140,49 +132,72 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   };
 
 
-  // function to close the new track options when clicking outside of the track options
-  const closeOptions = () => {
-    setTrackOptionsOpen(false);
-  };
-
-
+  
+  
   // function to open the file explorer when clicking the upload button
   const openFileExplorer = (event) => {
     document.getElementById("uploadButtonFileInput").click();
   };
+  
+  
+  // function to upload file to storage and return the download URL
+  const uploadFile = async (file) => {
+    const fileRef = storageRef(storage, `tracks/${currentProject.id}/${file.name}`);
+    uploadBytes(fileRef, file).then((snapshot) => {
+      console.log("Audio file uploaded");
+      getDownloadURL(snapshot.ref).then((url) => {
+        return url;
+      });
+    }).catch((e) => {
+      console.error(e);
+    });
+  };
 
+  // const uploadBlob = async (blob, projectId, trackId) => {
+  //   const fileRef = storageRef(storage, `tracks/${projectId}/${trackId}`);
+  //   uploadBytes(fileRef, blob).then((snapshot) => {
+  //     console.log("Audio file uploaded");
+  //     getDownloadURL(snapshot.ref).then((url) => {
+  //       return url;
+  //     });
+  //   }).catch((e) => {
+  //     console.error("Error uploading blob: ", e);
+  //   });
+  // };
+
+  const uploadBlob = async (blob, projectId, trackId) => {
+    try {
+      const fileRef = storageRef(storage, `tracks/${projectId}/${trackId}`);
+      const snapshot = await uploadBytes(fileRef, blob);
+      console.log("Audio file uploaded");
+      // Here we need to return the promise that getDownloadURL returns
+      const url = await getDownloadURL(snapshot.ref);
+      return url; // This now correctly returns the URL
+    } catch (e) {
+      console.error("Error uploading blob: ", e);
+      // You should throw the error so it can be caught where uploadBlob is called
+      throw e;
+    }
+  };
+  
 
   // function to handle the file input when a file is selected
   const handleFileInput = (event) => {
     //Validate file type as audio
-    if (event.target.files.length === 0) {
+    if (event.target.files.length === 0) 
       return;
-    }
     if (
       !event.target.files[0].type.includes("audio") &&
       !event.target.files[0].name.includes(".mp3") &&
       !event.target.files[0].name.includes(".wav")
-    ) {
-      return;
-    }
+    ) return;
+      
     const file = event.target.files[0];
-
-    const url = URL.createObjectURL(file);
-
-    const uploadTrack = async () => {
-      const trackRef = await addDoc(collection(db, "projects", currentProject.id, "tracks"), {
-        name: file.name,
-        link: url,
-        trackBodyColor: "#C98161",
-        trackWaveColor: "#A3684E",
-        startTime: 0,
-        duration: 0,
-      });
-
-
+    uploadFile(file).then((url) => {
       const newTrack = {
-        id: trackRef.id,
+        id: tracks.length,
         projectId: currentProject.id,
+        position: tracks.length,
         name: file.name,
         link: url,
         trackBodyColor: "#C98161",
@@ -192,30 +207,36 @@ export default function Editor({ currentProject }) { //currentProject is the doc
         isRecording: false,
         volume: 100,
       };
-    setTracks([...tracks, newTrack]);
+      // update the database with the new track
+      const projectRef = doc(db, "projects", currentProject.id);
+      const newTrackField = `tracks.${newTrack.id}`;
+      updateDoc(projectRef, { [newTrackField]: {
+        name: newTrack.name,
+        link: newTrack.link,
+        trackBodyColor: newTrack.trackBodyColor,
+        trackWaveColor: newTrack.trackWaveColor,
+        startTime: newTrack.startTime,
+        duration: newTrack.duration,
+        position: newTrack.position,
+      }, })
+      .then(() => {
+        console.log("new track added to db in position: ", newTrack.position);
+        setTracks([...tracks, newTrack]);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+    });
   };
 
-
-};
-
-
-
-
+    
   // function to handle recording new tracks
-  const recordNewTrack = () => {
-    // create a new server entry for the new track
-    server[`project${currentProject.id}`][`track${tracks.length}`] = {
-      name: "Recording",
-      link: null,
-      trackBodyColor: "#C98161",
-      trackWaveColor: "#A3684E",
-      startTime: playheadPosition / pixelsPerSecond,
-      duration: 0,
-    };
+  const recordNewTrack = async () => {
     // create a new recording track object and add it to the tracks array
     const newTrack = {
       id: tracks.length,
       projectId: currentProject.id,
+      position: tracks.length,
       name: "Recording",
       link: null,
       trackBodyColor: "#C98161",
@@ -225,8 +246,40 @@ export default function Editor({ currentProject }) { //currentProject is the doc
       isRecording: true,
       volume: 100,
     };
+
+    // update the database with the new track
+    const projectRef = doc(db, "projects", currentProject.id);
+    const newTrackField = `tracks.${newTrack.id}`;
+
+    try {
+      await updateDoc(projectRef, { [newTrackField]: {
+        name: newTrack.name,
+        link: newTrack.link,
+        trackBodyColor: newTrack.trackBodyColor,
+        trackWaveColor: newTrack.trackWaveColor,
+        startTime: newTrack.startTime,
+        duration: newTrack.duration,
+        position: newTrack.position,
+      } });
+      console.log("new track added to db in position: ", newTrack.position);
+    } catch (e) {
+      console.error(e);
+    }
+
+    // set the new track in the tracks array
     setTracks([...tracks, newTrack]);
   };
+
+
+
+    
+  // function to close the new track options when clicking outside of the track options
+  const closeOptions = () => {
+    setTrackOptionsOpen(false);
+  };
+    
+
+
 
   // function to export the project as an mp3 file
   const exportProjectAsMp3 = async () => {
@@ -250,7 +303,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
-  
+
     URL.revokeObjectURL(url);
   };
   
@@ -280,6 +333,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
                 trackIsRecording={track.isRecording}
                 trackVolume={track.volume}
                 dbUpdateTrack={dbUpdateTrack}
+                uploadBlob={uploadBlob}
                 pixelsPerSecond={pixelsPerSecond}
                 playheadPosition={playheadPosition}
                 playheadChangeIsCausedByUser={playheadChangeIsCausedByUser}

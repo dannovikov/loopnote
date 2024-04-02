@@ -5,6 +5,8 @@ import styles from './track.module.css'
 import WaveSurfer from 'wavesurfer.js';
 import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js'
 import Draggable from 'react-draggable'; 
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+
 
 
 export default function Track({
@@ -19,6 +21,7 @@ export default function Track({
   trackIsRecording,
   trackVolume,
   dbUpdateTrack,
+  uploadBlob,
   pixelsPerSecond,
   playheadPosition,
   playheadChangeIsCausedByUser,
@@ -31,7 +34,7 @@ export default function Track({
   const waveformRef = useRef(null);
 
   const [startTime, setStartTime] = useState(Number(trackStartTime));
-  const lastStartTime = useRef(0);
+  const lastStartTime = useRef(Number(trackStartTime));
   const [trackStartTimeChanged, setTrackStartTimeChanged] = useState(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -143,15 +146,32 @@ export default function Track({
         }, 1000); 
       });
       
+      // // update the track url when recording ends
+      // record.on('record-end', (blob) => {
+      //   console.log("recording ended")
+      //   setIsRecording(false);
+      //   uploadBlob(blob, projectId, id).then((url) => {
+      //     console.log("url: ", url)
+      //     setUrl(url);
+      //     dbUpdateTrack("link", url, projectId, id);
+      //   });
+      // });
+
       // update the track url when recording ends
       record.on('record-end', (blob) => {
-        const recordedUrl = URL.createObjectURL(blob);
-        console.log("recording ended", recordedUrl);
+        console.log("recording ended");
         setIsRecording(false);
-        dbUpdateTrack("link", recordedUrl, projectId, id);
-        setUrl(recordedUrl);
+        // Since uploadBlob is an async function, it returns a promise so you can use .then()
+        uploadBlob(blob, projectId, id).then((url) => {
+          console.log("url: ", url); // Now url should log the correct download URL
+          setUrl(url);
+          dbUpdateTrack("link", url, projectId, id);
+        }).catch((error) => {
+          console.error("Error getting download URL: ", error);
+        });
       });
-      
+
+
       // listen for "r" key to stop recording
       document.addEventListener('keydown', (e) => {
         if (e.key === 'r') {
