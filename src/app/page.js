@@ -27,7 +27,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
 
@@ -47,16 +46,15 @@ const getProjectIds = async () => {
       
 
 export default function Home() {
-  
 
   const [currentProject, setCurrentProject] = useState({id: "1", name: "Project 1"})
 
   useEffect(() => {
+    const analytics = getAnalytics(app);
     async function gp() {
       await getProjectIds().then((projects) => {
         setCurrentProject(projects[0])
       })
-   
     }
     gp()
   }, [])

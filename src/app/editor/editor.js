@@ -153,17 +153,6 @@ export default function Editor({ currentProject }) { //currentProject is the doc
     });
   };
 
-  // const uploadBlob = async (blob, projectId, trackId) => {
-  //   const fileRef = storageRef(storage, `tracks/${projectId}/${trackId}`);
-  //   uploadBytes(fileRef, blob).then((snapshot) => {
-  //     console.log("Audio file uploaded");
-  //     getDownloadURL(snapshot.ref).then((url) => {
-  //       return url;
-  //     });
-  //   }).catch((e) => {
-  //     console.error("Error uploading blob: ", e);
-  //   });
-  // };
 
   const uploadBlob = async (blob, projectId, trackId) => {
     try {
