@@ -1,12 +1,11 @@
 import styles from './projectbarentry.module.css'
 import React, { useState } from 'react';
 
-export default function ProjectBarEntry({id, name, link, setCurrentProject, isCurrentProject}) {
+export default function ProjectBarEntry({id, name, setCurrentProject, isCurrentProject}) {
 
     const currentProject = {
         "id": id, 
         "name": name,
-        "link": link,
     }
 
     if (isCurrentProject) {

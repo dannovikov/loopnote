@@ -9,32 +9,9 @@ import Track from "../track/track";
 import PlayControlsArea from "../playcontrolsarea/playcontrolsarea";
 import NewTrackButtons from "../newtrackbuttons/newtrackbuttons";
 
+import { getFirestore, addDoc, collection, getDocs, getDoc, doc, updateDoc } from "firebase/firestore";
 
-// Function to fetch the tracks of a project from the server
-const fetchProjectTracks = (projectId, server, dbUpdateTrackStartTime) => {
-  const project = server[`project${projectId}`];
-  let tracks = [];
-  for (const [trackId, trackData] of Object.entries(project)) {
-    const track = {
-      id: trackId.replace("track", ""),
-      projectId: projectId,
-      name: trackData.name,
-      link: trackData.link,
-      trackBodyColor: trackData.trackBodyColor,
-      trackWaveColor: trackData.trackWaveColor,
-      startTime: trackData.startTime,
-      duration: trackData.duration,
-      dbUpdateTrackStartTime: dbUpdateTrackStartTime,
-      isRecording: false,
-      volume: 100,
-    };
-    tracks.push(track);
-  }
-  return tracks;
-};
-
-
-export default function Editor({ currentProject, server }) {
+export default function Editor({ currentProject }) { //currentProject is the document id of the current project
   const [tracks, setTracks] = useState([]);
   const [trackOptionsOpen, setTrackOptionsOpen] = useState(false);
   const [pixelsPerSecond, setPixelsPerSecond] = useState(5);
@@ -43,10 +20,10 @@ export default function Editor({ currentProject, server }) {
   const [playheadChangeIsCausedByUser, setPlayheadChangeIsCausedByUser] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [projectVolume, setProjectVolume] = useState(50);
-  
 
+  const db = getFirestore();
+  
   // Effect to update the playhead position every 100ms when the audio is playing
-  //Todo: just make it based on time. not position.  or better yet manage both the time and the position. 
   useEffect(() => {
     if (isPlaying) {
       const interval = setInterval(() => {
@@ -58,7 +35,7 @@ export default function Editor({ currentProject, server }) {
 
   
   // Effect to reposition the playhead when pixelsPerSecond changes
-  // TODO: save project PPS in the server with each project
+  // TODO: save project PPS in the db with each project
   useEffect(() => {
     setPlayheadPosition((prevPlayheadPosition) => prevPlayheadPosition * pixelsPerSecond / prevPixelsPerSecond);
     setPrevPixelsPerSecond(pixelsPerSecond); 
@@ -67,12 +44,29 @@ export default function Editor({ currentProject, server }) {
 
   // Effect to change the tracks when the current project changes
   useEffect(() => {
-    const newTracks = fetchProjectTracks(
-      currentProject.id,
-      server,
-      dbUpdateTrackStartTime
-    );
-    setTracks(newTracks);
+    async function getTracks() {
+      const projectRef = doc(db, "projects", currentProject.id);
+      const projectDoc = await getDoc(projectRef);
+      const projectData = projectDoc.data();
+      if (!projectData) {return;}
+      const tracksData = projectData.tracks;
+      const tracksArray = Object.keys(tracksData).map((key) => {
+        return {
+          id: key,
+          projectId: currentProject.id,
+          name: tracksData[key].name,
+          link: tracksData[key].link,
+          trackBodyColor: tracksData[key].trackBodyColor,
+          trackWaveColor: tracksData[key].trackWaveColor,
+          startTime: tracksData[key].startTime,
+          duration: tracksData[key].duration,
+          isRecording: false,
+          volume: 100,
+        };
+      });       
+      setTracks(tracksArray);
+    }
+    getTracks();
   }, [currentProject]);
 
 
@@ -90,9 +84,7 @@ export default function Editor({ currentProject, server }) {
             } );
         }
     };
-
     document.addEventListener("keydown", togglePlay);
-
     return () => {
         document.removeEventListener("keydown", togglePlay);
     };
@@ -119,42 +111,32 @@ export default function Editor({ currentProject, server }) {
   }, [setPixelsPerSecond, isPlaying]);
 
 
-  // function to update the start time of a track when it is dragged to a new position
-  const dbUpdateTrackStartTime = (projectId, trackId, startTime) => {
-    server[`project${projectId}`][`track${trackId}`]["startTime"] = startTime;
-    // find the track with matching id in tracks and update the start time
-    const newTracks = tracks.map((track) => {
-      if (track.id === trackId) {
-        track.startTime = startTime;
-      }
-      return track;
-    });
-  };
+  const dbUpdateTrack = async (field, value, projectId, trackId) => {
+    console.log("attempting to update: ", field, value, projectId, trackId)
+    /*
+    Access within a track object record, you have the following available fields:
+      - name (todo)
+      - duration
+      - link
+      - startTime
+      - trackBodyColor
+      - trackWaveColor
+    */
+    const projectRef = doc(db, "projects", projectId);
+    const trackField = `tracks.${trackId}.${field}`;
+    // try {
+    await updateDoc(projectRef, { [trackField]: value });
+    console.log(`${field} updated`);
+    // }
+    // catch (e) {
+    //   console.error(e);
+    // }
 
-
-  //function to update the duration of a track when waveSurfer loads it
-  const dbUpdateTrackDuration = (projectId, trackId, duration) => {
-    server[`project${projectId}`][`track${trackId}`]["duration"] = duration;
-    const newTracks = tracks.map((track) => {
-      if (track.id === trackId) {
-        track.duration = duration;
-      }
-      return track;
-    });
-  };
-
-
-  // function to update the link of a track when it is uploaded
-  const dbUpdateTrackLink = (projectId, trackId, link) => {
-    server[`project${projectId}`][`track${trackId}`]["link"] = link;
-    // find the track with matching id in tracks and update the link
-    const newTracks = tracks.map((track) => {
-      if (track.id === trackId) {
-        track.link = link;
-      }
-      return track;
-    });
-
+    setTracks((currentTracks) =>
+      currentTracks.map((track) =>
+        track.id === trackId ? { ...track, [field]: value } : track
+      )
+    );
   };
 
 
@@ -185,33 +167,38 @@ export default function Editor({ currentProject, server }) {
     }
     const file = event.target.files[0];
 
-    // Upload file to server
-    // TODO: This is just a placeholder until a real backend is implemented
-    server[`project${currentProject.id}`][`track${tracks.length}`] = {
-      name: file.name,
-      link: URL.createObjectURL(file),
-      trackBodyColor: "#C98161",
-      trackWaveColor: "#A3684E",
-      startTime: 0,
-      duration: 0,
-    };
+    const url = URL.createObjectURL(file);
 
-    // create new track object and add it to the tracks array
-    const newTrack = {
-      id: tracks.length,
-      projectId: currentProject.id,
-      name: file.name,
-      link: URL.createObjectURL(file),
-      trackBodyColor: "#C98161",
-      trackWaveColor: "#A3684E",
-      startTime: 0,
-      duration: 0,
-      dbUpdateTrackStartTime: dbUpdateTrackStartTime,
-      isRecording: false,
-      volume: 100,
-    };
+    const uploadTrack = async () => {
+      const trackRef = await addDoc(collection(db, "projects", currentProject.id, "tracks"), {
+        name: file.name,
+        link: url,
+        trackBodyColor: "#C98161",
+        trackWaveColor: "#A3684E",
+        startTime: 0,
+        duration: 0,
+      });
+
+
+      const newTrack = {
+        id: trackRef.id,
+        projectId: currentProject.id,
+        name: file.name,
+        link: url,
+        trackBodyColor: "#C98161",
+        trackWaveColor: "#A3684E",
+        startTime: 0,
+        duration: 0,
+        isRecording: false,
+        volume: 100,
+      };
     setTracks([...tracks, newTrack]);
   };
+
+
+};
+
+
 
 
   // function to handle recording new tracks
@@ -235,7 +222,6 @@ export default function Editor({ currentProject, server }) {
       trackWaveColor: "#A3684E",
       startTime: playheadPosition / pixelsPerSecond,
       duration: 0,
-      dbUpdateTrackStartTime: dbUpdateTrackStartTime,
       isRecording: true,
       volume: 100,
     };
@@ -254,9 +240,7 @@ export default function Editor({ currentProject, server }) {
     });
 
     const mergedBuffer = crunker.mergeAudio(paddedBuffers);
-
     const { blob } = crunker.export(mergedBuffer, 'audio/mp3');
-
     const url = URL.createObjectURL(blob);
 
     // Create a temporary download link and click it
@@ -284,7 +268,7 @@ export default function Editor({ currentProject, server }) {
           {tracks.map((track, index) => {
             return (
               <Track
-                key={index}
+                key={track.id + track.projectId}
                 id={track.id}
                 projectId={track.projectId}
                 name={track.name}
@@ -295,9 +279,7 @@ export default function Editor({ currentProject, server }) {
                 trackWaveColor={track.trackWaveColor}
                 trackIsRecording={track.isRecording}
                 trackVolume={track.volume}
-                dbUpdateTrackStartTime={dbUpdateTrackStartTime}
-                dbUpdateTrackDuration={dbUpdateTrackDuration}
-                dbUpdateTrackLink={dbUpdateTrackLink}
+                dbUpdateTrack={dbUpdateTrack}
                 pixelsPerSecond={pixelsPerSecond}
                 playheadPosition={playheadPosition}
                 playheadChangeIsCausedByUser={playheadChangeIsCausedByUser}

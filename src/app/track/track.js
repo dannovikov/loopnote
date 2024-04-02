@@ -3,10 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './track.module.css'
 import WaveSurfer from 'wavesurfer.js';
-// import 'wavesurfer.js/dist/plugin/wavesurfer.timeline.min.js';
 import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js'
-
-import Draggable from 'react-draggable'; // The default
+import Draggable from 'react-draggable'; 
 
 
 export default function Track({
@@ -20,9 +18,7 @@ export default function Track({
   trackWaveColor,
   trackIsRecording,
   trackVolume,
-  dbUpdateTrackStartTime,
-  dbUpdateTrackDuration,
-  dbUpdateTrackLink,
+  dbUpdateTrack,
   pixelsPerSecond,
   playheadPosition,
   playheadChangeIsCausedByUser,
@@ -53,6 +49,7 @@ export default function Track({
 
   // Intialize wavesurfer
   useEffect(() => {
+    console.log("Recreating track #" + id)
     waveSurferRef.current = WaveSurfer.create({
       container: waveformRef.current,
       waveColor: trackWaveColor,
@@ -66,13 +63,16 @@ export default function Track({
     }    
     waveSurferRef.current.on('ready', function () {
       const waveDuration = waveSurferRef.current.getDuration();
-      setDuration(waveDuration);
-      dbUpdateTrackDuration(projectId, id, waveDuration);
+      if (waveDuration !== duration) {
+        console.log("unequal durations: ", waveDuration, duration)
+        setDuration(waveDuration);
+        dbUpdateTrack("duration", waveDuration, projectId, id);
+      }
     });
   }, []);
 
 
-  // the main "play" and timing logic
+  // Play and timing logic
   useEffect(() => {
     const playheadTimeSeconds = playheadPosition / pixelsPerSecond;
     const playheadTimeRelativeToTrack = playheadTimeSeconds - startTime;
@@ -148,7 +148,7 @@ export default function Track({
         const recordedUrl = URL.createObjectURL(blob);
         console.log("recording ended", recordedUrl);
         setIsRecording(false);
-        dbUpdateTrackLink(projectId, id, recordedUrl);
+        dbUpdateTrack("link", recordedUrl, projectId, id);
         setUrl(recordedUrl);
       });
       
@@ -176,7 +176,7 @@ export default function Track({
   }, [isRecording]);
 
 
-  // handle volume changes
+  // handle project volume changes
   useEffect(() => {
     console.log("volume: ", volume);
     console.log("projectVolume: ", projectVolume);
@@ -194,10 +194,10 @@ export default function Track({
   useEffect(() => {
     const interval = setInterval(() => {
       if (startTime !== null && startTime !== lastStartTime.current) {
-        dbUpdateTrackStartTime(projectId, id, startTime);
+        dbUpdateTrack("startTime", startTime, projectId, id);
         lastStartTime.current = startTime;
       }
-    }, 250); // Update at most 4x per second
+    }, 500); // Update at most 2x per second
     return () => clearInterval(interval);
   }, [startTime]);
 

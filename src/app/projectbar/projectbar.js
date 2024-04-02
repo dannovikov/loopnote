@@ -10,15 +10,18 @@ export default function ProjectBar({currentProject, setCurrentProject, getProjec
   const [projects, setProjects] = useState([])
 
   useEffect(() => {
-    const projects = getProjects()
-    setProjects(projects)
-  }, [])
+    const fetchData = async () => {
+      const projects = await getProjects();
+      setProjects(projects);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
-    console.log(currentProject)
+    console.log("currentproject:", currentProject)
   }, [currentProject])
 
-  console.log("progressbar", projects)
   return (
       <div className={styles.project_bar}>
         <div className={styles.project_bar_header}>
@@ -27,7 +30,7 @@ export default function ProjectBar({currentProject, setCurrentProject, getProjec
         <div className={styles.project_bar_content}>
           {projects.map((project, index) => {
             return (
-              <ProjectBarEntry key={index} id={project.id} name={project.name} link={project.link} setCurrentProject={setCurrentProject} isCurrentProject={project.id === currentProject}/>
+              <ProjectBarEntry key={index} id={project.id} name={project.name} setCurrentProject={setCurrentProject} isCurrentProject={project.id === currentProject}/>
             )
           })}
       </div>
