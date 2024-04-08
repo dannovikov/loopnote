@@ -186,7 +186,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
     const file = event.target.files[0];
     uploadFile(file).then((url) => {
       const newTrack = {
-        id: tracks.length,
+        id: new Date().valueOf(),
         projectId: currentProject.id,
         position: tracks.length,
         name: file.name,
@@ -225,7 +225,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   const recordNewTrack = async () => {
     // create a new recording track object and add it to the tracks array
     const newTrack = {
-      id: tracks.length,
+      id: new Date().valueOf(),
       projectId: currentProject.id,
       position: tracks.length,
       name: "Recording",
@@ -277,12 +277,11 @@ export default function Editor({ currentProject }) { //currentProject is the doc
 
 
 
-  const deleteTrack = async (trackId) => {
+  const dbDeleteTrack = async (trackId) => {
     const projectRef = doc(db, "projects", currentProject.id);
     const trackField = `tracks.${trackId}`;
     await updateDoc(projectRef, { [trackField]: deleteField() });
-    console.log("track deleted");
-    setTracks(tracks.filter((track) => track.id !== trackId));
+    console.log("track deleted", trackField);
   };
 
   
@@ -290,8 +289,9 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   useEffect(() => {
     const deleteSelectedTracks = (event) => {
       if (event.key === "Delete" || event.key === "Backspace") {
-        selectedTracks.forEach((track) => {
-          deleteTrack(track.id);
+        setTracks(tracks.filter((track) => !selectedTracks.includes(track.id)));
+        selectedTracks.forEach((trackId) => {
+          dbDeleteTrack(trackId);
         });
         setSelectedTracks([]);
       }

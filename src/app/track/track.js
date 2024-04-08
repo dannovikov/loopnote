@@ -155,17 +155,6 @@ export default function Track({
         }, 1000); 
       });
       
-      // // update the track url when recording ends
-      // record.on('record-end', (blob) => {
-      //   console.log("recording ended")
-      //   setIsRecording(false);
-      //   uploadBlob(blob, projectId, id).then((url) => {
-      //     console.log("url: ", url)
-      //     setUrl(url);
-      //     dbUpdateTrack("link", url, projectId, id);
-      //   });
-      // });
-
       // update the track url when recording ends
       record.on('record-end', (blob) => {
         console.log("recording ended");
