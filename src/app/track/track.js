@@ -19,6 +19,7 @@ export default function Track({
   trackBodyColor,
   trackWaveColor,
   trackIsRecording,
+  trackIsSelected,
   trackVolume,
   dbUpdateTrack,
   uploadBlob,
@@ -29,25 +30,33 @@ export default function Track({
   projectIsPlaying,
   setProjectIsPlaying,
   projectVolume,
+  selectTrack,
 }) {
+
   const waveSurferRef = useRef(null);
   const waveformRef = useRef(null);
-
   const [startTime, setStartTime] = useState(Number(trackStartTime));
   const lastStartTime = useRef(Number(trackStartTime));
   const [trackStartTimeChanged, setTrackStartTimeChanged] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(trackIsRecording);
-
   const [position, setPosition] = useState({ x: startTime * pixelsPerSecond, y: 0 });
   const [duration, setDuration] = useState(trackDuration > 0 ? trackDuration : 5);
-
   const [recordingTime, setRecordingTime] = useState(-4.5);
-
   const [volume, setVolume] = useState(trackVolume);
-
   const [url, setUrl] = useState(link);
+  
+
+  const [waveformStyle, setWaveformStyle] = useState({
+    backgroundColor: trackIsSelected ? "rgba(0, 0, 0, 0.1)" : trackBodyColor,
+    height: "100%",
+    borderRadius: "10px",
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+  });  
+
+
 
 
   // Intialize wavesurfer
@@ -221,21 +230,45 @@ export default function Track({
     return () => clearInterval(interval);
   }, [startTime]);
 
+  // Function to update drag state based on event type
+  const eventControl = (event) => {
+    if (event.type === 'mousemove' || event.type === 'touchmove') {
+      setIsDragging(true);
+    } else if (event.type === 'mouseup' || event.type === 'touchend') {
+      setTimeout(() => setIsDragging(false), 100); // Delay to distinguish from click
+    }
+  };
 
   // Function to handle dragging the track
   const handleDrag = (e, data) => {
+    eventControl(e);
     console.log("dragged to: ", data.x / pixelsPerSecond);
     setStartTime(data.x / pixelsPerSecond);
     setTrackStartTimeChanged(true);
   };
-  
-  
-  const waveformStyle = {
-    backgroundColor: trackBodyColor,
-    height: "100%",
-    borderRadius: "10px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-  };
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (isDragging) return;
+    console.log("clicked track: ", id);
+    if (e.shiftKey) 
+      selectTrack(id, true);
+    else
+      selectTrack(id, false);
+  }
+
+  const dimColor = (color, factor) => '#' + color.slice(1).match(/.{2}/g).map(hex => Math.floor(parseInt(hex, 16) * factor).toString(16).padStart(2, '0')).join('');
+
+  useEffect(() => {
+    console.log("trackIsSelected: ", trackIsSelected);
+    setWaveformStyle({
+      backgroundColor: trackIsSelected ? dimColor(trackBodyColor, 0.7) : trackBodyColor,
+      height: "100%",
+      borderRadius: "10px",
+      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+    });
+
+  }, [trackIsSelected]);
 
 
   const displayWidth = isRecording ? recordingTime+duration : duration;
@@ -245,9 +278,10 @@ export default function Track({
       <Draggable
         bounds="parent"
         onDrag={handleDrag}
+        onStop={eventControl}
         position={position}
       >
-        <div className={styles.track_body} style={{ width: displayWidth * pixelsPerSecond }}>
+        <div className={styles.track_body} style={{ width: displayWidth * pixelsPerSecond }} onClick={handleClick}>
           <div className={styles.track_name}>track name</div>
           <div className={styles.track_waveform}>
             <div ref={waveformRef} style={waveformStyle}></div>

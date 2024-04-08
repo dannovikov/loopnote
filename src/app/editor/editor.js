@@ -9,7 +9,7 @@ import Track from "../track/track";
 import PlayControlsArea from "../playcontrolsarea/playcontrolsarea";
 import NewTrackButtons from "../newtrackbuttons/newtrackbuttons";
 
-import { getFirestore, addDoc, collection, getDocs, getDoc, doc, updateDoc } from "firebase/firestore";
+import { getFirestore, addDoc, collection, getDocs, getDoc, doc, updateDoc, deleteField } from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function Editor({ currentProject }) { //currentProject is the document id of the current project
@@ -21,6 +21,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   const [playheadChangeIsCausedByUser, setPlayheadChangeIsCausedByUser] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [projectVolume, setProjectVolume] = useState(50);
+  const [selectedTracks, setSelectedTracks] = useState([]);
 
   const db = getFirestore();
   const storage = getStorage();
@@ -66,6 +67,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
           startTime: tracksData[key].startTime,
           duration: tracksData[key].duration,
           isRecording: false,
+          isSelected: false,
           volume: 100,
         };
 
@@ -259,17 +261,54 @@ export default function Editor({ currentProject }) { //currentProject is the doc
     setTracks([...tracks, newTrack]);
   };
 
-
-
-    
-  // function to close the new track options when clicking outside of the track options
-  const closeOptions = () => {
-    setTrackOptionsOpen(false);
+  
+  const selectTrack = (trackId, shiftClick=false) => {
+    const trackAlreadySelected = selectedTracks.includes(trackId);
+    const leftClick = !shiftClick;
+    if (leftClick){
+      setSelectedTracks([trackId]);
+    } else if (shiftClick && !trackAlreadySelected) {
+      setSelectedTracks([...selectedTracks, trackId]);
+    } else if (shiftClick && trackAlreadySelected) {
+      setSelectedTracks(selectedTracks.filter((id) => id !== trackId));
+    }
+    console.log("selected tracks: ", selectedTracks);
   };
-    
 
 
 
+  const deleteTrack = async (trackId) => {
+    const projectRef = doc(db, "projects", currentProject.id);
+    const trackField = `tracks.${trackId}`;
+    await updateDoc(projectRef, { [trackField]: deleteField() });
+    console.log("track deleted");
+    setTracks(tracks.filter((track) => track.id !== trackId));
+  };
+
+  
+  // on keypress delete, or backspace, delete the selected tracks
+  useEffect(() => {
+    const deleteSelectedTracks = (event) => {
+      if (event.key === "Delete" || event.key === "Backspace") {
+        selectedTracks.forEach((track) => {
+          deleteTrack(track.id);
+        });
+        setSelectedTracks([]);
+      }
+    };
+    document.addEventListener("keydown", deleteSelectedTracks);
+    return () => {
+      document.removeEventListener("keydown", deleteSelectedTracks);
+    };
+  }, [selectedTracks]);    
+  
+  
+  // function to close the new track options when clicking outside of the track options
+  const editorWhitespaceClick = () => {
+    setTrackOptionsOpen(false);
+    setSelectedTracks([]);
+  };
+  
   // function to export the project as an mp3 file
   const exportProjectAsMp3 = async () => {
     const crunker = new Crunker();
@@ -298,7 +337,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   
 
   return (
-    <div className={styles.editor_area} onClick={closeOptions}>
+    <div className={styles.editor_area} onClick={editorWhitespaceClick}>
       <Header name={currentProject.name} exportProjectAsMp3={exportProjectAsMp3} />
       <div className={styles.editor_centering_container}>
         <div className={styles.editor} style={{ width: `${500 * pixelsPerSecond}px` }} >
@@ -320,6 +359,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
                 trackBodyColor={track.trackBodyColor}
                 trackWaveColor={track.trackWaveColor}
                 trackIsRecording={track.isRecording}
+                trackIsSelected={selectedTracks.includes(track.id)}
                 trackVolume={track.volume}
                 dbUpdateTrack={dbUpdateTrack}
                 uploadBlob={uploadBlob}
@@ -330,6 +370,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
                 projectIsPlaying={isPlaying}
                 setProjectIsPlaying={setIsPlaying}
                 projectVolume={projectVolume}
+                selectTrack={selectTrack}                
               />
             );
           })}
