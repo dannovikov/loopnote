@@ -1,0 +1,22 @@
+.new_project_button {
+  margin-right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: #333333;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
+}
+
+.new_project_button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.new_project_button:active {
+  background-color: #282828;
+}
+

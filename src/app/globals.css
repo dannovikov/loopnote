@@ -2,6 +2,7 @@ body {
     padding:0;
     margin:0;
     overscroll-behavior-x: contain;
+    user-select: none;
 }
 
 /* I am using this to define a global css variable for header height, 

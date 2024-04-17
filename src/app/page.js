@@ -37,12 +37,27 @@ const getProjectIds = async () => {
   projectTracks.forEach((doc) => {
     projects.push({
       id: doc.id,
-      name: doc.data().name
+      name: doc.data().name,
+      dateCreated: doc.data().dateCreated,
+      dateModified: doc.data().dateModified
     })
   }
   )
-  return projects
+  return projects.sort((a, b) => b.dateModified - a.dateModified)
 }
+
+
+const dbCreateNewProject = async () => {
+  // Create a new project with an empty tracks array
+  const docRef = await addDoc(collection(db, "projects"), {
+    name: "New Project",
+    dateCreated: new Date().valueOf(),
+    dateModified: new Date().valueOf(),
+    tracks: []
+  });
+  return docRef.id
+}
+
       
 
 export default function Home() {
@@ -61,7 +76,7 @@ export default function Home() {
 
   return (
       <div className={styles.page}>
-        <ProjectBar id="project-bar" currentProject={currentProject} setCurrentProject={setCurrentProject} getProjects={getProjectIds}/>
+        <ProjectBar id="project-bar" currentProject={currentProject} setCurrentProject={setCurrentProject} getProjects={getProjectIds} dbCreateNewProject={dbCreateNewProject}/>
         <Editor id="editor" key={currentProject} currentProject={currentProject}/>
         {/* I have left key= here to force refresh on project change. only necessary for demo */}
       </div>
