@@ -40,5 +40,7 @@
 
 .deletebutton {
     visibility: hidden;
+    background-color: #383838;
+    color: white;
 
 }
