@@ -1,7 +1,7 @@
 .new_project_button {
   margin-right: 10px;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 20%;
   display: flex;
   justify-content: center;
@@ -12,8 +12,8 @@
 }
 
 .new_project_button svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 .new_project_button:active {

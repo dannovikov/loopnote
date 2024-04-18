@@ -1,28 +1,44 @@
+.projectbarentrycontainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-right: 10px;
+}
+
 .projectbarentry {
     display: flex;
     flex-direction: row;
     justify-content: left;
     width: auto;
     height: auto;
-    /* color:#A0A2A4; */
     color: white;
-    background-color: #1F2123;
     padding-top: 5px;
     padding-bottom: 5px;
-    border-radius: 10px;
-    margin-left: 10px;
+    border-radius: 1px;
     margin-right: 10px;
     margin-top: 0;
     margin-bottom: 0;
     padding: 10px;
+    text-overflow: ellipsis;
 
 }
-.projectbarentry:hover {
+.projectbarentrycontainer:hover {
     background-color: #2F3133;
     color: white;
 }
+
 
 .current {
     color: white;
-    background-color: #2F3133;
+    background-color: #383838;
+}
+
+
+.projectbarentrycontainer:hover .deletebutton {
+    visibility: visible;
+}
+
+.deletebutton {
+    visibility: hidden;
+
 }

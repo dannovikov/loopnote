@@ -6,14 +6,14 @@ import ProjectBarEntry from './projectbarentry/projectbarentry'
 import NewProjectButton from './newprojectbutton/newprojectbutton'
 
 
-export default function ProjectBar({ currentProject, setCurrentProject, getProjects, dbCreateNewProject }) {
+export default function ProjectBar({ currentProject, setCurrentProject, getProjects, dbCreateNewProject, dbDeleteProject }) {
   const [count, setCount] = useState(0);
   const [projects, setProjects] = useState([])
 
 
-  useEffect(() => { console.log("currentproject:", currentProject) }, [currentProject])
+  // useEffect(() => { console.log("currentproject:", currentProject) }, [currentProject])
 
-  // an effect to fetch projects from the server
+  // an effect to fetch projects from the server when the page loads
   useEffect(() => {
     const fetchData = async () => {
       const projects = await getProjects();
@@ -30,7 +30,12 @@ export default function ProjectBar({ currentProject, setCurrentProject, getProje
     setCurrentProject(newProjects.find(project => project.id === newProjectId));
   }
   
-
+  const deleteProject = async (id) => {
+    await dbDeleteProject(id);
+    const newProjects = await getProjects();
+    setProjects(newProjects);
+    setCurrentProject(newProjects[0]);
+  }
 
 
   return (
@@ -43,7 +48,7 @@ export default function ProjectBar({ currentProject, setCurrentProject, getProje
         {projects.map((project, index) => {
           return (
             <ProjectBarEntry key={index} id={project.id} name={project.name} 
-            setCurrentProject={setCurrentProject} isCurrentProject={project.id === currentProject} />
+            setCurrentProject={setCurrentProject} isCurrentProject={project.id === currentProject.id} deleteProject={deleteProject} />
           )
         })}
       </div>

@@ -1,7 +1,7 @@
 import styles from './projectbarentry.module.css'
 import React, { useState } from 'react';
 
-export default function ProjectBarEntry({id, name, setCurrentProject, isCurrentProject}) {
+export default function ProjectBarEntry({id, name, setCurrentProject, isCurrentProject, deleteProject}) {
 
     const currentProject = {
         "id": id, 
@@ -11,11 +11,17 @@ export default function ProjectBarEntry({id, name, setCurrentProject, isCurrentP
     if (isCurrentProject) {
         let class_string = `${styles.projectbarentry} ${styles.current}`
         return (
-            <p className={class_string} onClick={() => {setCurrentProject(currentProject)}}>{name}</p>
+            <div className={styles.projectbarentrycontainer}>
+                <p className={class_string} onClick={() => {setCurrentProject(currentProject)}}>{name}</p>
+                <button className={styles.deletebutton} onClick={() => {deleteProject(id)}}>x</button>
+            </div>
         );
     } 
 
     return (
-        <p className={styles.projectbarentry} onClick={() => {setCurrentProject(currentProject)}}>{name}</p>
+        <div className={styles.projectbarentrycontainer}>
+            <p className={styles.projectbarentry} onClick={() => {setCurrentProject(currentProject)}}>{name}</p>
+            <button className={styles.deletebutton} onClick={() => {deleteProject(id)}}>x</button>
+        </div>
     );
 }
