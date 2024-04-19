@@ -5,7 +5,8 @@
     height: var(--playcontrols-height);
     width: 200px;
     justify-content: space-around;
-    /* margin-bottom: 50px; */
+    margin-bottom: 50px;
+    /* padding-bottom: 50px; */
 }
 
 .controlbutton {

@@ -1,9 +1,9 @@
 
 .playcontrolsarea {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
     padding-top: var(--playcontrols-height);
     height: var(--playcontrols-height);
     width: 100% - var(--editor-left-margin);

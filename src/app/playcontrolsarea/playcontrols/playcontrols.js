@@ -1,6 +1,6 @@
 import styles from './playcontrols.module.css'
 
-export default function PlayControls({isPlaying, setIsPlaying, setPlayheadPosition, projectContentEndPosition, setPlayheadChangeIsCausedByUser}) {
+export default function PlayControls({isPlaying, editorRef, setIsPlaying, setPlayheadPosition, projectContentEndPosition, setPlayheadChangeIsCausedByUser}) {
   const togglePlay = () => {
     console.log("toggle play to: ", !isPlaying);
     setIsPlaying(!isPlaying);
@@ -11,6 +11,17 @@ export default function PlayControls({isPlaying, setIsPlaying, setPlayheadPositi
   const jumpToStart = () => {
     console.log("jump to start");
     setPlayheadPosition(0);
+    //scroll the editor to the start
+    editorRef.current.scrollLeft = 0;
+    setPlayheadChangeIsCausedByUser(true);
+  }
+
+  const jumpToEnd = () => {
+    console.log("jump to end");
+    setPlayheadPosition(projectContentEndPosition);
+    //scroll the editor to the end
+    editorRef.current.scrollLeft = editorRef.current.scrollWidth;
+
     setPlayheadChangeIsCausedByUser(true);
   }
 
@@ -31,8 +42,8 @@ export default function PlayControls({isPlaying, setIsPlaying, setPlayheadPositi
         </svg>
       </div>
 
-      <div className={styles.controlbutton}>
         {/* jump to end */}
+      <div className={styles.controlbutton} onClick={jumpToEnd}>
         <svg id={styles.ff} fill="none" stroke="#A0A2A4" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
         </svg>

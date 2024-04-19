@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Crunker from "crunker";
 import styles from "./editor.module.css";
 import Header from "../header/header";
@@ -19,6 +19,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   const [prevPixelsPerSecond, setPrevPixelsPerSecond] = useState(5); 
   const [playheadPosition, setPlayheadPosition] = useState(0);
   const [playheadChangeIsCausedByUser, setPlayheadChangeIsCausedByUser] = useState(false);
+  const [projectContentEndPosition, setProjectContentEndPosition] = useState(0); 
   const [isPlaying, setIsPlaying] = useState(false);
   const [projectVolume, setProjectVolume] = useState(50);
   const [selectedTracks, setSelectedTracks] = useState([]);
@@ -26,6 +27,8 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   const db = getFirestore();
   const storage = getStorage();
   
+  const editorRef = useRef(null);
+
   // Effect to update the playhead position every 100ms when the audio is playing
   useEffect(() => {
     if (isPlaying) {
@@ -75,6 +78,10 @@ export default function Editor({ currentProject }) { //currentProject is the doc
       // sort tracksArray by position
       tracksArray.sort((a, b) => a.position - b.position); 
       setTracks(tracksArray);
+
+      // Set the project content end position
+      const projectEndPosition = Math.max(...tracksArray.map((track) => track.startTime + track.duration));
+      setProjectContentEndPosition(projectEndPosition);
     }
     getTracks();
   }, [currentProject]);
@@ -339,8 +346,8 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   return (
     <div className={styles.editor_area} onClick={editorWhitespaceClick}>
       <Header name={currentProject.name} exportProjectAsMp3={exportProjectAsMp3} />
-      <div className={styles.editor_centering_container}>
-        <div className={styles.editor} style={{ width: `${500 * pixelsPerSecond}px` }} >
+      <div className={styles.editor_centering_container} ref={editorRef}>
+        <div className={styles.editor} style={{ width: `${500 * pixelsPerSecond}px` }}  >
           <PlayHeadBar
             playheadPosition={playheadPosition}
             setPlayheadPosition={setPlayheadPosition}
@@ -384,11 +391,9 @@ export default function Editor({ currentProject }) { //currentProject is the doc
         </div>
       </div>
       <PlayControlsArea
-        ntb_trackOptionsOpen={trackOptionsOpen}
-        ntb_setTrackOptionsOpen={setTrackOptionsOpen}
-        ntb_handleFileInput={handleFileInput}
-        ntb_openFileExplorer={openFileExplorer}
         isPlaying={isPlaying}
+        projectContentEndPosition={projectContentEndPosition * pixelsPerSecond}
+        editorRef={editorRef}
         setIsPlaying={setIsPlaying}
         setPlayheadPosition={setPlayheadPosition}
         setPlayheadChangeIsCausedByUser={setPlayheadChangeIsCausedByUser}
