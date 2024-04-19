@@ -1,0 +1,23 @@
+.delete_project_button {
+  width: 30px;
+  height: 30px;
+  border-radius: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: #333333;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
+}
+
+.delete_project_button svg {
+  width: 19px;
+  height: 19px;
+}
+
+.delete_project_button:active {
+  background-color: #282828;
+}
+
+
+

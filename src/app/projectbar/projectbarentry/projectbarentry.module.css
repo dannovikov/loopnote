@@ -3,6 +3,7 @@
     flex-direction: row;
     justify-content: space-between;
     padding-right: 10px;
+    align-items: center;
 }
 
 .projectbarentry {
@@ -40,7 +41,4 @@
 
 .deletebutton {
     visibility: hidden;
-    background-color: #383838;
-    color: white;
-
 }

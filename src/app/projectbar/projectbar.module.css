@@ -5,7 +5,7 @@
     /* border: 10px solid black; */
     padding-left: 10px;
     background-color: #1F2123;
-    overflow-y: scroll;
+    overflow-y: auto;
 
 }
 
