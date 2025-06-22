@@ -64,6 +64,8 @@ export default function Track({
   // Intialize wavesurfer
   useEffect(() => {
     console.log("Recreating track #" + id)
+    // Destroy previous wavesurfer instance to avoid memory leaks
+    waveSurferRef.current?.destroy();
     waveSurferRef.current = WaveSurfer.create({
       container: waveformRef.current,
       waveColor: trackWaveColor,
@@ -194,7 +196,7 @@ export default function Track({
       }); 
       
       
-      return () => clearInterval(interval);
+      return () => interval && clearInterval(interval);
     }
   }, [isRecording]);
 
