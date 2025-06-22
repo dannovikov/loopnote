@@ -44,7 +44,9 @@ export default function Track({
   const [isRecording, setIsRecording] = useState(trackIsRecording);
   const [position, setPosition] = useState({ x: startTime * pixelsPerSecond, y: 0 });
   const [duration, setDuration] = useState(trackDuration > 0 ? trackDuration : 5);
-  const [recordingTime, setRecordingTime] = useState(-4.5);
+
+  const [recordingTime, setRecordingTime] = useState(0);
+
   const [volume, setVolume] = useState(trackVolume);
   const [url, setUrl] = useState(link);
   
@@ -81,7 +83,7 @@ export default function Track({
         dbUpdateTrack("duration", waveDuration, projectId, id);
       }
     });
-  }, []);
+  }, [url]);
 
 
   // Play and timing logic
@@ -146,9 +148,12 @@ export default function Track({
       // grow the track body while recording
       let interval;
       record.on('record-start', () => {
+        const trueOffset = playheadPosition / pixelsPerSecond;
+        setStartTime(trueOffset);
+        dbUpdateTrack('startTime', trueOffset, projectId, id);
         setProjectIsPlaying(true);
         console.log("recording started")
-        const interval = setInterval(() => {
+        interval = setInterval(() => {
           if (isRecording) {
             setRecordingTime((prevRecordingTime) => prevRecordingTime + 1);
           }

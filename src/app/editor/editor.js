@@ -239,7 +239,7 @@ export default function Editor({ currentProject }) { //currentProject is the doc
       link: null,
       trackBodyColor: "#C98161",
       trackWaveColor: "#A3684E",
-      startTime: playheadPosition / pixelsPerSecond,
+      startTime: 0, // always 0, offset is now fixed by track.js
       duration: 0,
       isRecording: true,
       volume: 100,
