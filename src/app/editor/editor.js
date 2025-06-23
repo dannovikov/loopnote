@@ -29,6 +29,20 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   
   const editorRef = useRef(null);
 
+  // Pastel color palette from server.js tracks
+  const pastelTrackColors = [
+    { body: "#7348B7", wave: "#5E3B92" },
+    { body: "#4762C4", wave: "#384E9B" },
+    { body: "#61C9BD", wave: "#50A19A" },
+    { body: "#76D155", wave: "#61A842" },
+    { body: "#C98161", wave: "#A3684E" },
+    // Add more if desired
+  ];
+
+  function getRandomTrackColors() {
+    return pastelTrackColors[Math.floor(Math.random() * pastelTrackColors.length)];
+  }
+
   // Effect to update the playhead position every 100ms when the audio is playing
   useEffect(() => {
     if (isPlaying) {
@@ -231,14 +245,15 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   // function to handle recording new tracks
   const recordNewTrack = async () => {
     // create a new recording track object and add it to the tracks array
+    const randomColors = getRandomTrackColors();
     const newTrack = {
       id: new Date().valueOf(),
       projectId: currentProject.id,
       position: tracks.length,
       name: "Recording",
       link: null,
-      trackBodyColor: "#C98161",
-      trackWaveColor: "#A3684E",
+      trackBodyColor: randomColors.body,
+      trackWaveColor: randomColors.wave,
       startTime: 0, // always 0, offset is now fixed by track.js
       duration: 0,
       isRecording: true,
