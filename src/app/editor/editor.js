@@ -104,20 +104,22 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   // Effect to trigger play/pause when the space bar is pressed
   useEffect(() => {
     const togglePlay = (event) => {
-        if (event.code === "Space" ) {
-            event.preventDefault();  // Prevent scrolling and other side effects
-            setIsPlaying(currentIsPlaying =>{
-              const newState = !currentIsPlaying;
-              const eventName = newState ? "project-play" : "project-pause";
-              document.dispatchEvent( new CustomEvent(eventName) );
-              return newState;
-
-            } );
-        }
+      // Ignore if focus is on an input or textarea
+      const tag = event.target.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || event.target.isContentEditable) return;
+      if (event.code === "Space" ) {
+        event.preventDefault();  // Prevent scrolling and other side effects
+        setIsPlaying(currentIsPlaying =>{
+          const newState = !currentIsPlaying;
+          const eventName = newState ? "project-play" : "project-pause";
+          document.dispatchEvent( new CustomEvent(eventName) );
+          return newState;
+        });
+      }
     };
     document.addEventListener("keydown", togglePlay);
     return () => {
-        document.removeEventListener("keydown", togglePlay);
+      document.removeEventListener("keydown", togglePlay);
     };
   }, []); 
 
@@ -310,6 +312,9 @@ export default function Editor({ currentProject }) { //currentProject is the doc
   // on keypress delete, or backspace, delete the selected tracks
   useEffect(() => {
     const deleteSelectedTracks = (event) => {
+      // Ignore if focus is on an input or textarea
+      const tag = event.target.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || event.target.isContentEditable) return;
       if (event.key === "Delete" || event.key === "Backspace") {
         setTracks(tracks.filter((track) => !selectedTracks.includes(track.id)));
         selectedTracks.forEach((trackId) => {

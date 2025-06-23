@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react'
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, addDoc, collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { getFirestore, addDoc, collection, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
 
 // Your web app's Firebase configuration
@@ -64,6 +64,13 @@ const dbDeleteProject = async (id) => {
   await deleteDoc(doc(db, "projects", id));
 }
 
+const dbUpdateProjectName = async (id, newName) => {
+  const projectRef = doc(db, "projects", id);
+  await updateDoc(projectRef, {
+    name: newName,
+    dateModified: new Date().valueOf(),
+  });
+}
       
 
 export default function Home() {
@@ -82,7 +89,7 @@ export default function Home() {
 
   return (
       <div className={styles.page}>
-        <ProjectBar id="project-bar" currentProject={currentProject} setCurrentProject={setCurrentProject} getProjects={getProjectIds} dbCreateNewProject={dbCreateNewProject} dbDeleteProject={dbDeleteProject}/>
+        <ProjectBar id="project-bar" currentProject={currentProject} setCurrentProject={setCurrentProject} getProjects={getProjectIds} dbCreateNewProject={dbCreateNewProject} dbDeleteProject={dbDeleteProject} dbUpdateProjectName={dbUpdateProjectName}/>
         <Editor id="editor" key={currentProject} currentProject={currentProject}/>
         {/* I have left key= here to force refresh on project change. only necessary for demo */}
       </div>

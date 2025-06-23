@@ -6,7 +6,7 @@ import ProjectBarEntry from './projectbarentry/projectbarentry'
 import NewProjectButton from './newprojectbutton/newprojectbutton'
 
 
-export default function ProjectBar({ currentProject, setCurrentProject, getProjects, dbCreateNewProject, dbDeleteProject }) {
+export default function ProjectBar({ currentProject, setCurrentProject, getProjects, dbCreateNewProject, dbDeleteProject, dbUpdateProjectName }) {
   const [count, setCount] = useState(0);
   const [projects, setProjects] = useState([])
 
@@ -37,6 +37,19 @@ export default function ProjectBar({ currentProject, setCurrentProject, getProje
     setCurrentProject(newProjects[0]);
   }
 
+  const updateProjectName = async (id, newName) => {
+    if (typeof dbUpdateProjectName === 'function') {
+      await dbUpdateProjectName(id, newName);
+      const newProjects = await getProjects();
+      setProjects(newProjects);
+      if (currentProject.id === id) {
+        setCurrentProject(newProjects.find(p => p.id === id));
+      }
+    } else {
+      setProjects(projects => projects.map(p => p.id === id ? { ...p, name: newName } : p));
+    }
+  }
+
 
   return (
     <div className={styles.project_bar}>
@@ -48,7 +61,7 @@ export default function ProjectBar({ currentProject, setCurrentProject, getProje
         {projects.map((project, index) => {
           return (
             <ProjectBarEntry key={index} id={project.id} name={project.name} 
-            setCurrentProject={setCurrentProject} isCurrentProject={project.id === currentProject.id} deleteProject={deleteProject} />
+            setCurrentProject={setCurrentProject} isCurrentProject={project.id === currentProject.id} deleteProject={deleteProject} onUpdateName={updateProjectName} />
           )
         })}
       </div>

@@ -50,6 +50,8 @@ export default function Track({
 
   const [volume, setVolume] = useState(trackVolume);
   const [url, setUrl] = useState(link);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editableName, setEditableName] = useState(name);
   
 
   const [waveformStyle, setWaveformStyle] = useState({
@@ -289,6 +291,37 @@ export default function Track({
 
   const displayWidth = isRecording ? recordingTime : duration;
 
+  // Inline name editing state and handlers
+  useEffect(() => {
+    setEditableName(name);
+  }, [name]);
+
+  const handleNameClick = (e) => {
+    e.stopPropagation();
+    setIsEditingName(true);
+  };
+
+  const handleNameChange = (e) => {
+    setEditableName(e.target.value);
+  };
+
+  const handleNameBlur = () => {
+    setIsEditingName(false);
+    if (editableName !== name) {
+      dbUpdateTrack && dbUpdateTrack('name', editableName, projectId, id);
+    }
+  };
+
+  const handleInputKeyDown = (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') {
+      e.target.blur();
+    }
+  };
+  const handleInputKeyUp = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className={styles.track_container}>
       <Draggable
@@ -299,7 +332,22 @@ export default function Track({
         position={position}
       >
         <div ref={nodeRef} className={styles.track_body} style={{ width: displayWidth * pixelsPerSecond }} onClick={handleClick}>
-          <div className={styles.track_name}>track name</div>
+          <div className={styles.track_name} onClick={handleNameClick} style={{cursor: 'pointer'}}>
+            {isEditingName ? (
+              <input
+                type="text"
+                value={editableName}
+                onChange={handleNameChange}
+                onBlur={handleNameBlur}
+                onKeyDown={handleInputKeyDown}
+                onKeyUp={handleInputKeyUp}
+                autoFocus
+                style={{width: '90%'}}
+              />
+            ) : (
+              editableName
+            )}
+          </div>
           <div className={styles.track_waveform}>
             <div ref={waveformRef} style={waveformStyle}></div>
           </div>
