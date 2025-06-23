@@ -35,6 +35,7 @@ export default function Track({
 
   const waveSurferRef = useRef(null);
   const waveformRef = useRef(null);
+  const nodeRef = useRef(null);
   const [startTime, setStartTime] = useState(Number(trackStartTime));
   const lastStartTime = useRef(Number(trackStartTime));
   const [trackStartTimeChanged, setTrackStartTimeChanged] = useState(false);
@@ -74,9 +75,13 @@ export default function Track({
       height: 100,
       cursorWidth: 0,
     });
-    if (url) {
-      waveSurferRef.current.load(url);
-    }    
+    try {
+      if (url) {
+        waveSurferRef.current.load(url);
+      }
+    } catch (err) {
+      console.error('WaveSurfer failed to load url:', url, err);
+    }
     waveSurferRef.current.on('ready', function () {
       const waveDuration = waveSurferRef.current.getDuration();
       if (waveDuration !== duration) {
@@ -106,8 +111,17 @@ export default function Track({
       if (playheadTimeRelativeToTrack >= 0 && playheadTimeRelativeToTrack <= duration) {
         if (!isPlaying && !isRecording) { //if track is not playing, start playing it
           waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / duration);
-          waveSurferRef.current.play();
-          setIsPlaying(true);
+          const playPromise = waveSurferRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              setIsPlaying(true);
+            }).catch((e) => {
+              // Handle autoplay prevention or other errors
+              setIsPlaying(false);
+            });
+          } else {
+            setIsPlaying(true);
+          }
         } else { // if playhead moves while track is playing, synchronize the track with the playhead
           if (playheadChangeIsCausedByUser) { //not just time passing
             waveSurferRef.current.seekTo(playheadTimeRelativeToTrack / duration);
@@ -115,7 +129,9 @@ export default function Track({
           }
         }
       } else { // if playhead is outside of track, pause the track
-        waveSurferRef.current.pause();
+        if (waveSurferRef.current.isPlaying()) {
+          waveSurferRef.current.pause();
+        }
         try{
           waveSurferRef.current.seekTo(0);
         } catch (e) {
@@ -126,7 +142,9 @@ export default function Track({
         setIsPlaying(false);
       }
     } else { // if project is not playing, pause the track and synchronize the track with the playhead
-      waveSurferRef.current.pause();
+      if (waveSurferRef.current.isPlaying()) {
+        waveSurferRef.current.pause();
+      }
       try {
         waveSurferRef.current.seekTo(duration > 0 ? playheadTimeRelativeToTrack / duration : 0);
       } catch (e) {
@@ -267,17 +285,18 @@ export default function Track({
   }, [trackIsSelected]);
 
 
-  const displayWidth = isRecording ? recordingTime+duration : duration;
+  const displayWidth = isRecording ? recordingTime : duration;
 
   return (
     <div className={styles.track_container}>
       <Draggable
+        nodeRef={nodeRef}
         bounds="parent"
         onDrag={handleDrag}
         onStop={eventControl}
         position={position}
       >
-        <div className={styles.track_body} style={{ width: displayWidth * pixelsPerSecond }} onClick={handleClick}>
+        <div ref={nodeRef} className={styles.track_body} style={{ width: displayWidth * pixelsPerSecond }} onClick={handleClick}>
           <div className={styles.track_name}>track name</div>
           <div className={styles.track_waveform}>
             <div ref={waveformRef} style={waveformStyle}></div>
