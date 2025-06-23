@@ -59,8 +59,7 @@ export default function Track({
     boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
   });  
 
-
-
+  const shouldStopRecordingRef = useRef(false);
 
   // Intialize wavesurfer
   useEffect(() => {
@@ -206,15 +205,18 @@ export default function Track({
       });
 
       // listen for "project-pause" event to stop recording
-      document.addEventListener('project-pause', () => {
+      const handleProjectPause = () => {
         if (isRecording) {
           record.stopRecording();
-          setIsRecording(false);
+          shouldStopRecordingRef.current = true;
         }
-      }); 
+      };
+      document.addEventListener('project-pause', handleProjectPause);
       
-      
-      return () => interval && clearInterval(interval);
+      return () => {
+        interval && clearInterval(interval);
+        document.removeEventListener('project-pause', handleProjectPause);
+      };
     }
   }, [isRecording]);
 
